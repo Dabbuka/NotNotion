@@ -1,0 +1,15 @@
+# Dependencies
+node_modules/
+
+#Build artifacts
+build/
+dist/
+
+#Environment variables
+.env
+.env.local
+
+#OS-specific
+.DS_Store
+.swp
+Thumbs.db
