@@ -16,7 +16,7 @@ You must have **Node.js** installed locally on your computer. The installation s
    cd NotNotion/frontend
    npm install
    ```
-   > This step downloads all packages listed in `package.json`
+   This step downloads all packages listed in `package.json`
 
 2. **Run the Application:**
    While still in the `/NotNotion/frontend` directory, start the development server:
