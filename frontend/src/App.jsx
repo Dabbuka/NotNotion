@@ -1,31 +1,43 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import React, { useState, useRef, useEffect } from 'react'
+import ReactMarkdown from "react-markdown"
+import remarkGfm from "remark-gfm"
+import remarkBreaks from 'remark-breaks'
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
-
   const [text, setText] = useState(localStorage.getItem('savedText') || '');
-
+  const editorRef = useRef(null)
   const handleSave = () => {
     localStorage.setItem('savedText', text);
   };
-  
+  const handleInput = (e) => {
+    setText(e.currentTarget.innerText)
+  }
+  useEffect(() => {
+    if (editorRef.current && editorRef.current.innerText !== text) {
+      editorRef.current.innerText = text
+    }
+  }, [text])
   return (
     <>
-    <button className="saveButton" onClick={handleSave}>Save</button>
-  <div>
-    <textarea className="textBox" id="body" placeholder="Write here.."
-        value={text}
-        onChange={(e) => setText(e.target.value)}
+      <button className="saveButton" onClick={handleSave}>Save</button>
+      <div className="editor-container">
+        <div
+          ref={editorRef}
+          className="markdown-input"
+          contentEditable
+          onInput={handleInput}
+          placeholder="Write here.."
         />
-        <br />
-  </div>
-    
-    
+        <div className="markdown-preview">
+          <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>
+            {text}
+          </ReactMarkdown>
+        </div>
+      </div >
+
     </>
-      
+
   )
 }
 
