@@ -1,4 +1,4 @@
-# Dependencies
+#Dependencies
 node_modules/
 
 #Build artifacts
@@ -8,6 +8,9 @@ dist/
 #Environment variables
 .env
 .env.local
+
+#Json files
+*.json
 
 #OS-specific
 .DS_Store
