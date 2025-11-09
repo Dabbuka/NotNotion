@@ -9,9 +9,6 @@ dist/
 .env
 .env.local
 
-#Json files
-*.json
-
 #OS-specific
 .DS_Store
 .swp
