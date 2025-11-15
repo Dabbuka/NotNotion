@@ -3,11 +3,9 @@ const { createNote, getNotes } = require("../controllers/noteController");
 
 const router = express.Router();
 
-// run the createNote controller for POST methods from /api/notes
-// '/' instead of '/api/notes' is because prefix is handled in app.js
+// POST/GET methods from /api/notes
+// '/' is used instead of '/api/notes' is because prefix is handled in app.js
 router.post("/", createNote);
-
-// run the getNotes controller for GET methods from /api/notes
 router.get("/", getNotes);
 
 module.exports = router;

@@ -16,7 +16,6 @@ backend/
 └─ README.md             # This file
 
 ## Starting the Server
-
 To start the backend:
     npm start
 
@@ -28,7 +27,6 @@ Connected to MongoDB
 This means the backend is ready to accept requests from the frontend.
 
 ## API Routes
-
 Here’s an overview of the main routes:
 
 Route               Method	    Description
