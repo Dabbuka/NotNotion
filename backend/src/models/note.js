@@ -15,7 +15,7 @@ const NoteSchema = new Schema({
         ref: 'User',
         required: true
     },
-    userID: {
+    folderID: {
         type: Schema.Types.ObjectId,
         ref: 'Folder',
         required: true
