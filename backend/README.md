@@ -17,12 +17,17 @@ This is the backend for the NotNotion note-taking application. It is built using
   - `README.md` – This file
 
 ## Starting the Server
+Navigate to the backend directory and run:
+    npm install
+This is so all dependencies are added to your local machine.\
+
 To start the backend:
     npm start
 
 You should see a message like:
-Server running on port 5000
+Server running on port 5000\
 Connected to MongoDB
+
 
 This means the backend is ready to accept requests from the frontend.
 
