@@ -13,12 +13,11 @@ const NoteSchema = new Schema({
     ownerID: {
         type: Schema.Types.ObjectId,
         ref: 'User',
-        required: true
+        //required: true <-- Add this back later, it is being commented out right now so we can work on user authentication
     },
     folderID: {
         type: Schema.Types.ObjectId,
         ref: 'Folder',
-        required: true
     }
 }, {
     timestamps: true
