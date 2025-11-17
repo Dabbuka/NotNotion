@@ -5,10 +5,14 @@ const FolderSchema = new Schema({
     title: {
         type: String,
         required: true
+    },
+    ownerID: {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
     }
 }, {
     timestamps: true
-    //Todo: Add userID here later.
 });
 
 module.exports = mongoose.model('Folder', FolderSchema);

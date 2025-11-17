@@ -9,8 +9,17 @@ const NoteSchema = new Schema({
     content: {
         type: String,
         default: ""
+    },
+    ownerID: {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
+    userID: {
+        type: Schema.Types.ObjectId,
+        ref: 'Folder',
+        required: true
     }
-    //Todo: Add folderID and userID here later when those additions become relevant
 }, {
     timestamps: true
 });
