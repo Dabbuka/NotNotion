@@ -19,7 +19,7 @@ This is the backend for the NotNotion note-taking application. It is built using
 ## Starting the Server
 Navigate to the backend directory and run:
     npm install
-This is so all dependencies are added to your local machine.\
+This is so all dependencies are added to your local machine.
 
 To start the backend:
     npm start
