@@ -6,7 +6,7 @@ const FolderSchema = new Schema({
         type: String,
         required: true
     },
-    ownerID: {
+    userID: {
         type: Schema.Types.ObjectId,
         ref: 'User',
         required: true
