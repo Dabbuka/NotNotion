@@ -31,7 +31,7 @@ exports.createNote = async (req, res) => {
  */
 exports.getNotes = async (req, res) => {
   try {
-    const notes = await Note.find().sort({ updatedAt: -1 });
+    const notes = await Note.findById(req.params.id);  // find note by id, from /:id
     res.json(notes);
   } catch (err) {
     console.error(err.message);

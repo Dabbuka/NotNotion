@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
+import axios from 'axios'
 import MDEditor, { commands, heading1, heading2, heading3, heading4, heading5, heading6 } from '@uiw/react-md-editor';
 import './App.css'
 import '@uiw/react-md-editor/markdown-editor.css';
@@ -6,7 +7,23 @@ import '@uiw/react-markdown-preview/markdown.css';
 
 
 function App() {
-  const [value, setValue] = useState(() => localStorage.getItem('savedText') || '');
+  const noteId = "6917d095d3794db386c18f88" // ID for note titled Test #3
+  const [value, setValue] = useState("");
+
+  // Fetch note data on mount
+  useEffect(() => {
+      async function fetchNote() {
+        try {
+          const res = await axios.get(`/api/notes/${noteId}`);
+          console.log(res.data);
+          setValue(res.data.content);
+        } catch (err) {
+          console.error(err);
+        }
+      }
+
+      fetchNote();
+  }, [noteId]);
 
   const handleSave = () => {
     localStorage.setItem('savedText', value);
