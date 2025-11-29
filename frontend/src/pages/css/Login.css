@@ -1,0 +1,59 @@
+/* For main div element */
+.landing-page-login {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #242424;
+}
+
+/* Central login box */
+.login {
+    background-color: #333;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    width: 300px;
+    text-align: center;
+    color: white;
+}
+
+/* The input fields a user writes into */
+.input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    border: 1px solid #555;
+    background-color: #444;
+    color: white;
+    box-sizing: border-box;
+}
+
+/* The login button specifically */
+.login-button {
+    margin-top: 20px;
+    width: 100%;
+    background-color: #1a1a1a;
+    color: white;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: border-color 0.25s;
+}
+
+/* Make the border of the sign in button light up on hover */
+.login-button:hover {
+    border-color: #646cff;
+}
+
+/* Link to register an account */
+.register-link {
+    color: #646cff;
+    text-decoration: none;
+}
+
+/* Underline register link on hover */
+.register-link:hover {
+    text-decoration: underline;
+}

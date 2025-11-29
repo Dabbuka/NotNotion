@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import './css/Login.css'
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
@@ -16,68 +17,39 @@ const LoginPage = () => {
     console.log('Skibidi', formData);
   };
 
-  // Basic styles to center the box
-  const pageStyle = {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: '100vh',
-    backgroundColor: '#242424', 
-  };
-
-  const boxStyle = {
-    backgroundColor: '#333',
-    padding: '40px',
-    borderRadius: '10px',
-    boxShadow: '0 4px 8px rgba(0,0,0,0.3)',
-    width: '300px',
-    textAlign: 'center',
-    color: 'white'
-  };
-
-  const inputStyle = {
-    width: '100%',
-    padding: '10px',
-    margin: '10px 0',
-    borderRadius: '5px',
-    border: '1px solid #555',
-    backgroundColor: '#444',
-    color: 'white'
-  };
-
   return (
-    <div style={pageStyle}>
-      <div style={boxStyle}>
+    <div className="landing-page-login">
+      <div className="login">
         <h2>Login</h2>
         <form onSubmit={handleSubmit}>
           <div>
             <input
+              className="input"
               type="email"
               name="email"
               placeholder="Email"
               value={formData.email}
               onChange={handleChange}
-              style={inputStyle}
               required
             />
           </div>
           <div>
             <input
+              className="input"
               type="password"
               name="password"
               placeholder="Password"
               value={formData.password}
               onChange={handleChange}
-              style={inputStyle}
               required
             />
           </div>
-          <button type="submit" style={{ marginTop: '20px', width: '100%' }}>
+          <button type="submit" className="login-button">
             Sign In
           </button>
         </form>
         <p style={{ marginTop: '20px', fontSize: '0.9em' }}>
-          Don't have an account? <Link to="/register" style={{ color: '#646cff' }}>Register</Link>
+          Don't have an account? <Link to="/register" className="register-link">Register</Link>
         </p>
       </div>
     </div>
