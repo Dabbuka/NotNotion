@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import axios from 'axios'
 import MDEditor, { commands, heading1, heading2, heading3, heading4, heading5, heading6 } from '@uiw/react-md-editor';
-import '../App.css'
+import './css/NoteEditor.css';
 import '@uiw/react-md-editor/markdown-editor.css';
 import '@uiw/react-markdown-preview/markdown.css';
 
