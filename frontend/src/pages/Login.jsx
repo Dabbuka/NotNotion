@@ -19,12 +19,12 @@ const LoginPage = () => {
 
   return (
     <div className="landing-page-login">
-      <div className="login">
+      <div className="login-box">
         <h2>Login</h2>
         <form onSubmit={handleSubmit}>
           <div>
             <input
-              className="input"
+              className="input-login"
               type="email"
               name="email"
               placeholder="Email"
@@ -35,7 +35,7 @@ const LoginPage = () => {
           </div>
           <div>
             <input
-              className="input"
+              className="input-login"
               type="password"
               name="password"
               placeholder="Password"
@@ -48,7 +48,7 @@ const LoginPage = () => {
             Sign In
           </button>
         </form>
-        <p style={{ marginTop: '20px', fontSize: '0.9em' }}>
+        <p className="login-box-text">
           Don't have an account? <Link to="/register" className="register-link">Register</Link>
         </p>
       </div>

@@ -8,7 +8,7 @@
 }
 
 /* Central login box */
-.login {
+.login-box {
     background-color: #333;
     padding: 40px;
     border-radius: 10px;
@@ -19,7 +19,7 @@
 }
 
 /* The input fields a user writes into */
-.input {
+.input-login {
     width: 100%;
     padding: 10px;
     margin: 10px 0;
@@ -45,6 +45,12 @@
 /* Make the border of the sign in button light up on hover */
 .login-button:hover {
     border-color: #646cff;
+}
+
+/* Uniform look for text in login-box */
+.login-box-text {
+    margin-top: 20px;
+    font-size: 0.9em;
 }
 
 /* Link to register an account */
