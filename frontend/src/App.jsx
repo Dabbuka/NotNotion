@@ -4,8 +4,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import LandingPage from './pages/LandingPage';
 import NoteEditor from './pages/NoteEditor';
 import Register from './pages/Register';
-
-const Login = () => <h1 style={{color: 'white'}}>Login page placeholder</h1>;
+import Login from './pages/Login';
 
 function App() {
   return (
