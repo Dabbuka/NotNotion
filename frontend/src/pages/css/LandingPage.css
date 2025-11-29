@@ -1,0 +1,40 @@
+/* For main div element */
+.landing-page {
+  text-align: center;
+  margin-top: 100px;
+  color: white;
+}
+
+/* For div holding the three center buttons */
+.clickable-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 40px;
+}
+
+.landing-page h1 {
+  font-size: 3rem;
+  margin-bottom: 10px;
+}
+
+.landing-page p {
+  color: #ccc; 
+  font-size: 1.2rem;
+}
+
+/* Center button styling */
+.redirect-buttons {
+  background-color: #646; 
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+/* Hovering over the redirect buttons makes them lighter */
+.redirect-buttons:hover {
+  background-color: #858;
+}
