@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 const Schema = mongoose.Schema;
 
 const FolderSchema = new Schema({
@@ -15,4 +15,4 @@ const FolderSchema = new Schema({
     timestamps: true
 });
 
-module.exports = mongoose.model('Folder', FolderSchema);
+export default mongoose.model('Folder', FolderSchema);
