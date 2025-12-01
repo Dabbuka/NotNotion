@@ -2,25 +2,25 @@ import mongoose from 'mongoose';
 const Schema = mongoose.Schema;
 
 const NoteSchema = new Schema({
-    title: {
-        type: String,
-        required: true
-    },
-    content: {
-        type: String,
-        default: ""
-    },
-    userID: {
-        type: Schema.Types.ObjectId,
-        ref: 'User',
-        //required: true <-- Add this back later, it is being commented out right now so we can work on user authentication
-    },
-    folderID: {
-        type: Schema.Types.ObjectId,
-        ref: 'Folder',
-    }
+  title: {
+    type: String,
+    required: true
+  },
+  content: {
+    type: String,
+    default: ""
+  },
+  userID: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    //required: true <-- Add this back later, it is being commented out right now so we can work on user authentication
+  },
+  folderID: {
+    type: Schema.Types.ObjectId,
+    ref: 'Folder',
+  }
 }, {
-    timestamps: true
+  timestamps: true
 });
 
 export default mongoose.model('Note', NoteSchema);
