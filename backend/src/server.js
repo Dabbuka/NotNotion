@@ -14,7 +14,7 @@ app.listen(PORT, () => {
 
 
 
-router.post("/createFolder", createFolder);
-router.get("/:id", getFolder);
-router.patch("/renameFolder", renameFolder);
-router.post("/addNotes", addNote);
+// router.post("/createFolder", createFolder);
+// router.get("/:id", getFolder);
+// router.patch("/renameFolder", renameFolder);
+// router.post("/addNotes", addNote);

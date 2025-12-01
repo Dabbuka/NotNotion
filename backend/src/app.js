@@ -5,6 +5,7 @@ import cors from "cors";
 
 const app = express();
 
+process.stderr.write("ballz\n");
 
 
 // Middleware
@@ -15,8 +16,8 @@ app.use(express.json());
 app.get('/', (req, res) => {
   res.send('hello world')
 })
-app.use("/api/notes", noteRoutes);
-app.use("/api/folders", folderRoutes);
+// app.use("/api/notes", noteRoutes);
+// app.use("/api/folders", folderRoutes);
 
 
 export default app;
