@@ -1,9 +1,6 @@
 import Note from "../models/note.js";
 
-/**
- * @route POST /note
- * @desc Create a new note
- */
+// POST
 export const createNote = async (req, res) => {
   try {
     const { title, content } = req.body;
@@ -25,10 +22,7 @@ export const createNote = async (req, res) => {
   }
 };
 
-/**
- * @route GET /note
- * @desc Request for notes
- */
+// GET
 export const getNotes = async (req, res) => {
   try {
     const notes = await Note.findById(req.params.id);  // find note by id, from /:id
