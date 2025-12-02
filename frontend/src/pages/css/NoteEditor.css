@@ -333,3 +333,31 @@
     top: 10px;
   }
 }
+
+/* Image styling in the editor */
+.custom-md-editor .ProseMirror img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  margin: 10pt 0;
+  display: block;
+}
+
+.custom-md-editor .ProseMirror img.custom-image {
+  cursor: pointer;
+}
+
+/* Active state for link button */
+.custom-md-editor .w-md-editor-toolbar button.is-active {
+  background-color: #e8eaed;
+}
+
+/* Link hover state in editor */
+.custom-md-editor .ProseMirror a.custom-link {
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.custom-md-editor .ProseMirror a.custom-link:hover {
+  color: #1557b0;
+}
