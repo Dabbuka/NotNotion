@@ -7,6 +7,8 @@ import Image from '@tiptap/extension-image'
 import Dropcursor from '@tiptap/extension-dropcursor'
 import './css/NoteEditor.css'
 
+const SAVE_MODE = 'local'
+
 function NoteEditor() {
   const noteId = "6917d095d3794db386c18f88"
   const [initialContent, setInitialContent] = useState("")
@@ -34,7 +36,7 @@ function NoteEditor() {
     ],
     content: initialContent,
     editorProps: {
-      handlePaste: (view, event, slice) => {
+      handlePaste: (event) => {
         const items = Array.from(event.clipboardData?.items || [])
 
         // Check if there are any image items in the clipboard
@@ -72,8 +74,6 @@ function NoteEditor() {
 
           if (imageFiles.length > 0) {
             event.preventDefault()
-
-            const { schema } = view.state
             const coordinates = view.posAtCoords({ left: event.clientX, top: event.clientY })
 
             imageFiles.forEach(file => {
@@ -99,32 +99,49 @@ function NoteEditor() {
         return false
       }
     },
-    onUpdate: ({ editor }) => {
-      const content = editor.getHTML()
-    },
   })
 
   useEffect(() => {
-    async function fetchNote() {
+    async function loadNote() {
       try {
-        const res = await axios.get(`/api/notes/${noteId}`)
-        const content = res.data.content
+        let content = ''
+
+        if (SAVE_MODE === 'backend') {
+          const res = await axios.get(`/api/notes/${noteId}`)
+          content = res.data.content
+        } else {
+          // Load from localStorage instead
+          const localKey = `note-${noteId}`
+          const savedContent = localStorage.getItem(localKey)
+          content = savedContent || ''
+
+        }
+
         setInitialContent(content)
         if (editor) {
           editor.commands.setContent(content)
         }
       } catch (err) {
-        console.error(err)
+        console.error('Error loading note:', err)
+        const localKey = `note-${noteId}`
+        const savedContent = localStorage.getItem(localKey) || ''
+        setInitialContent(savedContent)
+        if (editor) {
+          editor.commands.setContent(savedContent)
+        }
       }
     }
-    fetchNote()
+
+    loadNote()
   }, [noteId, editor])
 
   const handleSave = () => {
     if (editor) {
       const content = editor.getHTML()
+      const localKey = `note-${noteId}`
+
+      localStorage.setItem(localKey, content)
       setInitialContent(content)
-      localStorage.setItem('savedText', content)
     }
   }
 
