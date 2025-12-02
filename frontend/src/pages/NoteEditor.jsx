@@ -14,6 +14,23 @@ function NoteEditor() {
   const editor = useEditor({
     extensions: [
       StarterKit,
+      Link.configure({
+        openOnClick: false,
+        HTMLAttributes: {
+          class: 'custom-link',
+        },
+      }),
+      Image.configure({
+        inline: false,
+        allowBase64: true, // Allow base64 images for paste
+        HTMLAttributes: {
+          class: 'custom-image',
+        },
+      }),
+      Dropcursor.configure({
+        color: '#1a73e8',
+        width: 2,
+      }),
     ],
     content: initialContent,
     editorProps: {
