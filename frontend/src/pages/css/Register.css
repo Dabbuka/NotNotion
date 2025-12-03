@@ -9,23 +9,25 @@
 
 /* Central register box */
 .register-box {
-    background-color: #333;
+    background-color: #646;
     padding: 40px;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
     width: 300px;
     text-align: center;
     color: white;
+    margin: auto;
+    margin-top: 250px;
 }
 
 /* The input field a user writes into */
 .input-register {
-    width: 100%;
+    width: 90%;
     padding: 10px;
     margin: 10px 0;
     border-radius: 5px;
     border: 1px solid #555;
-    background: #444;
+    background: #ffffff;
     color: white;
 }
 
