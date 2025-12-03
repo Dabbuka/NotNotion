@@ -17,7 +17,6 @@ const clientOptions = {
 
 const connectDB = async () => {
     try {
-        process.stderr.write("i luv sheen\n");
         await mongoose.connect(uri, clientOptions);
         console.log('Connected to MongoDB successfully!')
     } catch (err) {

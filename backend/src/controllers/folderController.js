@@ -2,6 +2,7 @@ import Folder from "../models/folder.js";
 
 //POST
 export const createFolder = async (req, res) => {
+  console.log('hello')
   try {
     const { title, content } = req.body;
 
@@ -52,4 +53,3 @@ export const renameFolder = async(req, res) => {
 export const addFolder = async(req, res) =>{
   console.log("hey");
 }
-

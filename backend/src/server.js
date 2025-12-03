@@ -1,8 +1,6 @@
 //Imports
-
 import connectDB from "./config/db.js";
 import app from "./app.js";
-
 
 //Establish access to database
 connectDB();
@@ -13,8 +11,3 @@ app.listen(PORT, () => {
 });
 
 
-
-// router.post("/createFolder", createFolder);
-// router.get("/:id", getFolder);
-// router.patch("/renameFolder", renameFolder);
-// router.post("/addNotes", addNote);
