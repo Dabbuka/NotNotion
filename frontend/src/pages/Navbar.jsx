@@ -15,8 +15,8 @@ function Navbar() {
       
       <div className="navbar-links">
         <Link 
-          to="/" 
-          className={`navbar-link ${location.pathname === '/' ? 'active' : ''}`}
+          to="/home" 
+          className={`navbar-link ${location.pathname === '/home' ? 'active' : ''}`}
         >
           Home
         </Link>

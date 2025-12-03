@@ -6,6 +6,8 @@ import LandingPage from './pages/LandingPage';
 import NoteEditor from './pages/NoteEditor';
 import Register from './pages/Register';
 import Login from './pages/Login';
+import Home from './pages/Home';
+
 
 function App() {
   return (
@@ -15,9 +17,10 @@ function App() {
         
         <Routes>
           <Route path="/" element={<LandingPage />} />
+          <Route path="/home" element={<Home />} /> 
           <Route path="/app" element={<NoteEditor />} /> 
           <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} /> 
+          <Route path="/register" element={<Register />} />
         </Routes>
       </BrowserRouter>
   );

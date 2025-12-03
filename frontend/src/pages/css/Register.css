@@ -9,7 +9,7 @@
 
 /* Central register box */
 .register-box {
-    background-color: #333;
+    background-color: #646;
     padding: 40px;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
@@ -25,8 +25,8 @@
     margin: 10px 0;
     border-radius: 5px;
     border: 1px solid #555;
-    background-color: #444;
-    color: white;
+    background-color: white;
+    color: rgb(0, 0, 0);
     box-sizing: border-box;
 }
 
