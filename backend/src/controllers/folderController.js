@@ -1,25 +1,55 @@
-import folder from "../models/folder.js";
+import Folder from "../models/folder.js";
 
-/**
- * @route POST /api/folders
- * @desc Create a folder (stub for rn)
- */
+//POST
 export const createFolder = async (req, res) => {
-    res.status(501).json({ message: "Folder creation to be implemented later"});
+  console.log('hello')
+  try {
+    const { title, content } = req.body;
+
+    if (!title) {
+      return res.status(400).json({ message: "Please include a title" });
+    }
+
+    const newFolder = new Folder({
+      title: title,
+      content: content,
+    });
+
+    const savedFolder = await newFolder.save();
+    res.status(201).json(savedFolder);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server error");
+  }
 };
 
-/**
- * @route GET /api/folders
- * @desc Get folders (stub for rn)
- */
+//GET
 export const getFolder = async (req, res) => {
-    res.status(501).json({ message: "Folder retrieval to be implemented later"});
+  try {
+    const Folder = await Folder.findById(req.params.id);  // find note by id, from /:id
+    res.json(Folder);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server error");
+  }
 };
 
-/**
- * @route PUT /api/folders
- * @desc Rename folder (stub for rn)
- */
-export const renameFolder = async (req, res) => {
-    res.status(501).json({ message: "Folder renaming to be implemented later"});
+//PATCH
+export const renameFolder = async(req, res) => {
+  const id = req.params.id;
+  const { newTitle } = req.body;
+  
+  if (!newTitle) {
+    return res.status(400).json({ error: "newTitle required" });
+  }
+
+  console.log("Renaming folder", id, "to", newTitle);
+
+
+  return res.status(200).json({ success: true });
 };
+
+
+export const addFolder = async(req, res) =>{
+  console.log("hey");
+}
