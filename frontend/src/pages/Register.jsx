@@ -19,7 +19,7 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="register-landing-page">
+    <div className="landing-page-register">
       <div className="register-box">
         <h2>Create Account</h2>
         <form onSubmit={handleSubmit}>

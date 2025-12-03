@@ -1,93 +1,192 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import axios from 'axios'
-import MDEditor, { commands, heading1, heading2, heading3, heading4, heading5, heading6 } from '@uiw/react-md-editor';
-import './css/NoteEditor.css';
-import '@uiw/react-md-editor/markdown-editor.css';
-import '@uiw/react-markdown-preview/markdown.css';
+import { useEditor, EditorContent } from '@tiptap/react'
+import StarterKit from '@tiptap/starter-kit'
+import Link from '@tiptap/extension-link'
+import Image from '@tiptap/extension-image'
+import Dropcursor from '@tiptap/extension-dropcursor'
+import './css/NoteEditor.css'
 
+const SAVE_MODE = 'local'
 
-function App() {
-  const noteId = "6917d095d3794db386c18f88" // ID for note titled Test #3
-  const [value, setValue] = useState("");
+function NoteEditor() {
+  const noteId = "6917d095d3794db386c18f88"
+  const [initialContent, setInitialContent] = useState("")
 
-  // Fetch note data on mount
+  const editor = useEditor({
+    extensions: [
+      StarterKit,
+      Link.configure({
+        openOnClick: false,
+        HTMLAttributes: {
+          class: 'custom-link',
+        },
+      }),
+      Image.configure({
+        inline: false,
+        allowBase64: true, // Allow base64 images for paste
+        HTMLAttributes: {
+          class: 'custom-image',
+        },
+      }),
+      Dropcursor.configure({
+        color: '#1a73e8',
+        width: 2,
+      }),
+    ],
+    content: initialContent,
+    editorProps: {
+      handlePaste: (event) => {
+        const items = Array.from(event.clipboardData?.items || [])
+
+        // Check if there are any image items in the clipboard
+        const imageItems = items.filter(item => item.type.indexOf('image') !== -1)
+
+        if (imageItems.length > 0) {
+          event.preventDefault()
+
+          imageItems.forEach(item => {
+            const file = item.getAsFile()
+            if (file) {
+              const reader = new FileReader()
+
+              reader.onload = (e) => {
+                const base64Image = e.target?.result
+                if (base64Image && editor) {
+                  // Insert the image at the current cursor position
+                  editor.chain().focus().setImage({ src: base64Image }).run()
+                }
+              }
+
+              reader.readAsDataURL(file)
+            }
+          })
+
+          return true // Prevent default paste behavior
+        }
+
+        return false // Allow default paste for non-image content
+      },
+      handleDrop: (view, event, slice, moved) => {
+        if (!moved && event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files.length > 0) {
+          const files = Array.from(event.dataTransfer.files)
+          const imageFiles = files.filter(file => file.type.indexOf('image') !== -1)
+
+          if (imageFiles.length > 0) {
+            event.preventDefault()
+            const coordinates = view.posAtCoords({ left: event.clientX, top: event.clientY })
+
+            imageFiles.forEach(file => {
+              const reader = new FileReader()
+
+              reader.onload = (e) => {
+                const base64Image = e.target?.result
+                if (base64Image && editor && coordinates) {
+                  editor.chain().focus().insertContentAt(coordinates.pos, {
+                    type: 'image',
+                    attrs: { src: base64Image }
+                  }).run()
+                }
+              }
+
+              reader.readAsDataURL(file)
+            })
+
+            return true
+          }
+        }
+
+        return false
+      }
+    },
+  })
+
   useEffect(() => {
-      async function fetchNote() {
-        try {
-          const res = await axios.get(`/api/notes/${noteId}`);
-          console.log(res.data);
-          setValue(res.data.content);
-        } catch (err) {
-          console.error(err);
+    async function loadNote() {
+      try {
+        let content = ''
+
+        if (SAVE_MODE === 'backend') {
+          const res = await axios.get(`/api/notes/${noteId}`)
+          content = res.data.content
+        } else {
+          // Load from localStorage instead
+          const localKey = `note-${noteId}`
+          const savedContent = localStorage.getItem(localKey)
+          content = savedContent || ''
+
+        }
+
+        setInitialContent(content)
+        if (editor) {
+          editor.commands.setContent(content)
+        }
+      } catch (err) {
+        console.error('Error loading note:', err)
+        const localKey = `note-${noteId}`
+        const savedContent = localStorage.getItem(localKey) || ''
+        setInitialContent(savedContent)
+        if (editor) {
+          editor.commands.setContent(savedContent)
         }
       }
+    }
 
-      fetchNote();
-  }, [noteId]);
+    loadNote()
+  }, [noteId, editor])
 
   const handleSave = () => {
-    localStorage.setItem('savedText', value);
-  };
+    if (editor) {
+      const content = editor.getHTML()
+      const localKey = `note-${noteId}`
 
-  /* This is to put the save button in the toolbar */
-  const saveCommand = {
-    name:"save",
-    keyCommand:"save",
-    icon: <button className="save-button" onClick={handleSave}> Save Document </button>,
-    execute: (state, api) => {
-      localStorage.setItem('savedText', state.text);
+      localStorage.setItem(localKey, content)
+      setInitialContent(content)
     }
-    
-  
   }
-  
-  
 
   return (
-    <>
-    
-      <div className="custom-md-editor">
-        
-        <MDEditor
-          value={value}
-          onChange={setValue}
-          visibleDragbar = {false}
-          
-          commands = {[
-            saveCommand,
-            commands.group([
-              commands.title1,
-              commands.title2,
-              commands.title3,
-              commands.title4,
-              commands.title5,
-              commands.title6
-            ], {
-              name: 'title',
-              groupName: 'title',
-              buttonProps: { 'aria-label': 'Insert title' },
-              className:"title-button",
-            }),       // All heading levels grouped
-            commands.bold,         // Bold **
-            commands.italic,       // Italics
-            commands.strikethrough,
-            commands.hr,           // Horizontal Rule ---
-            commands.link,         // Insert link
-            commands.image,       // Insert image
-            commands.unorderedListCommand, // Bullet list
-            commands.orderedListCommand,   // Numbered list
-            commands.code,         // Inline code
-            commands.table,
-            commands.divider,      // Toolbar divider line
-            
-          ]}
-        />
-        
+    <div className="custom-md-editor">
+      <div className="w-md-editor-toolbar">
+        <button className="save-button" onClick={handleSave}>
+          Save Document
+        </button>
+        <button onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()}>
+          H1
+        </button>
+        <button onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}>
+          H2
+        </button>
+        <button onClick={() => editor?.chain().focus().toggleHeading({ level: 3 }).run()}>
+          H3
+        </button>
+        <button onClick={() => editor?.chain().focus().toggleBold().run()}>
+          Bold
+        </button>
+        <button onClick={() => editor?.chain().focus().toggleItalic().run()}>
+          Italic
+        </button>
+        <button onClick={() => editor?.chain().focus().toggleStrike().run()}>
+          Strike
+        </button>
+        <button onClick={() => editor?.chain().focus().setHorizontalRule().run()}>
+          HR
+        </button>
+        <button onClick={() => editor?.chain().focus().toggleBulletList().run()}>
+          • List
+        </button>
+        <button onClick={() => editor?.chain().focus().toggleOrderedList().run()}>
+          1. List
+        </button>
+        <button onClick={() => editor?.chain().focus().toggleCodeBlock().run()}>
+          Code
+        </button>
       </div>
-
-
-    </>
-  );
+      <div className="w-md-editor">
+        <EditorContent editor={editor} className="editor-content" />
+      </div>
+    </div>
+  )
 }
 
-export default App;
+export default NoteEditor
