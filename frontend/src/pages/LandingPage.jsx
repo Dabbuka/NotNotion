@@ -20,6 +20,10 @@ const LandingPage = () => {
         <Link to="/app">
           <button className="redirect-buttons">Go to Notes</button>
         </Link>
+
+        <Link to="/home">
+          <button className="redirect-buttons">Home</button>
+        </Link>
       </div>
     </div>
   );
