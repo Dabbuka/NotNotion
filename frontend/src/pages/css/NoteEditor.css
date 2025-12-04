@@ -127,6 +127,15 @@
   font-size: 20px;
 }
 
+
+.custom-md-editor .note-title-input {
+  background-color: white;
+  color: black;
+  border: transparent;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
 .custom-md-editor .save-button:hover {
   background-color: #a6a6a6;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
