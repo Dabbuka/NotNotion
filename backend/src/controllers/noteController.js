@@ -1,10 +1,7 @@
-const Note = require("../models/note");
+import Note from "../models/note.js";
 
-/**
- * @route POST /note
- * @desc Create a new note
- */
-exports.createNote = async (req, res) => {
+// POST
+export const createNote = async (req, res) => {
   try {
     const { title, content } = req.body;
 
@@ -25,11 +22,8 @@ exports.createNote = async (req, res) => {
   }
 };
 
-/**
- * @route GET /note
- * @desc Request for notes
- */
-exports.getNotes = async (req, res) => {
+// GET
+export const getNotes = async (req, res) => {
   try {
     const notes = await Note.findById(req.params.id);  // find note by id, from /:id
     res.json(notes);

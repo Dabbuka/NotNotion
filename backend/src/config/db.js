@@ -1,7 +1,11 @@
-const mongoose = require('mongoose');
-require('dotenv').config();
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const uri = process.env.MONGO_URI;
+
+
 
 const clientOptions = {
     serverAPI: {
@@ -16,8 +20,9 @@ const connectDB = async () => {
         await mongoose.connect(uri, clientOptions);
         console.log('Connected to MongoDB successfully!')
     } catch (err) {
+        console.log('uh oh!')
         console.error(err.message);
     }
 }
 
-module.exports = connectDB;
+export default connectDB;

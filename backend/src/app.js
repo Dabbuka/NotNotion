@@ -1,6 +1,8 @@
-const express = require("express");
-const cors = require("cors");
-const noteRoutes = require("./routes/noteRoutes");
+import express from "express";
+import cors from "cors";
+import noteRoutes from "./routes/noteRoutes.js";
+import folderRoutes from "./routes/folderRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
 
 const app = express();
 
@@ -9,6 +11,11 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
+app.get('/', (req, res) => {
+  res.send('hello')
+});
 app.use("/api/notes", noteRoutes);
+app.use("/api/folders", folderRoutes);
+app.use("/api/users", userRoutes);
 
-module.exports = app;
+export default app;
