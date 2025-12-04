@@ -1,0 +1,91 @@
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 40px;
+    background-color: #ffffff;
+    border-bottom: 1px solid #e0e0e0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    z-index: 100;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  }
+  
+  .navbar-brand {
+    display: flex;
+    align-items: center;
+  }
+  
+  .navbar-logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    text-decoration: none;
+    letter-spacing: -0.5px;
+  }
+  
+  .navbar-logo:hover {
+    color:  rgb(74, 50, 74);
+  }
+  
+  .navbar-links {
+    display: flex;
+    align-items: center;
+    margin-right: 60px;
+    gap: 8px;
+  }
+  
+  .navbar-link {
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #5f6368;
+    text-decoration: none;
+    border-radius: 6px;
+    transition: all 0.2s;
+  }
+  
+  .navbar-link:hover {
+    background-color: #f1f3f4;
+    color: #1a1a1a;
+  }
+  
+  .navbar-link.active {
+    color: rgb(74, 50, 74);
+    background-color: #e8f0fe;
+  }
+  
+  /* Special styling for Register button */
+  .navbar-link-register {
+    background-color: #646;
+    color: #ffffff !important;
+  }
+  
+  .navbar-link-register:hover {
+    background-color: #1557b0;
+    color: #ffffff !important;
+  }
+   
+  .navbar-link-register.active {
+    background-color: #1557b0;
+    color: #ffffff !important;
+  }
+  
+  /* Responsive */
+  @media (max-width: 600px) {
+    .navbar {
+      padding: 12px 20px;
+    }
+    
+    .navbar-logo {
+      font-size: 1.2rem;
+    }
+    
+    .navbar-link {
+      padding: 6px 12px;
+      font-size: 13px;
+    }
+  }

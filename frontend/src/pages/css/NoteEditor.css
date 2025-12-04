@@ -1,0 +1,344 @@
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-color-scheme: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+/* Main editor container - Google Docs style */
+.custom-md-editor {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #242424;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* Extra top padding to account for navbar (70px) + toolbar height (~50px) */
+  padding: 120px 40px 20px;
+  box-sizing: border-box;
+}
+
+/* Wrapper for toolbar and document to keep them together */
+.custom-md-editor>div {
+  width: 100%;
+  max-width: 1000px;
+  /* Same max-width for both toolbar and document */
+}
+
+/* Toolbar - matches document width exactly */
+.custom-md-editor .w-md-editor-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding:0px 16px;
+  width: 100%;
+  max-width: 100vw;
+  /* Matches document width */
+  background-color: #646;
+  border: 1px solid #646;
+  border-bottom: none;
+  
+  /* Will connect with document */
+  /* Stick toolbar to top below navbar - stays fixed when scrolling */
+  position: fixed;
+  top: 70px;
+  left: 0;
+  right: 0;
+  z-index: 99;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  margin: 0 auto;
+  /* Center the toolbar within the viewport while fixed */
+  box-sizing: border-box;
+  max-height: 45px;
+}
+
+/* Document container - same width as toolbar */
+.custom-md-editor .w-md-editor {
+  max-width: 900px;
+  /* Matches toolbar width */
+  width: 100%;
+  min-height: calc(100vh - 100px);
+  background-color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  padding: 90px 100px;
+  line-height: 1.6;
+  text-align: left;
+  border: 1px solid #e0e0e0;
+  border-radius: 0 0 8px 8px;
+  border-top: none;
+  box-sizing: border-box;
+  margin: 0 auto;
+  margin-top: 15px;
+  /* Center the document */
+}
+
+.w-md-editor-toolbar .button-border {
+  font-size: 20px;
+  color:#a5a5a5
+}
+/* Save button styling - Google Docs blue */
+.custom-md-editor .save-button {
+  background-color: #a6a6a6;
+  color: #ffffff;
+  padding: 7px 16px;
+  font-size: 14px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 500;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.custom-md-editor .button-border {
+  font-size: 20px;
+}
+
+.custom-md-editor .save-button:hover {
+  background-color: #a6a6a6;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.custom-md-editor .save-button:active {
+  background-color: #767676;
+}
+
+/* Toolbar buttons - Google Docs style */
+.custom-md-editor .w-md-editor-toolbar button {
+  background-color: transparent;
+  color: #ffffff;
+  border: none;
+  padding: 6px 10px;
+  font-size: 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.15s;
+  min-width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.custom-md-editor .w-md-editor-toolbar button:hover {
+  background-color: #a6a6a6;
+}
+
+.custom-md-editor .w-md-editor-toolbar button:active {
+  background-color: #a6a6a6;
+}
+
+/* Tiptap editor content area */
+.custom-md-editor .editor-content {
+  width: 100%;
+  min-height: calc(100vh - 200px);
+  background-color: transparent;
+  color: #000000;
+  text-align: left;
+}
+
+/* Style the actual ProseMirror editor inside Tiptap */
+.custom-md-editor .ProseMirror {
+  width: 100%;
+  min-height: calc(100vh - 200px);
+  outline: none;
+  font-size: 11pt;
+  line-height: 1.6;
+  color: #202124;
+  font-family: Arial, Helvetica, sans-serif;
+  text-align: left;
+}
+
+/* Placeholder text when editor is empty */
+.custom-md-editor .ProseMirror p.is-editor-empty:first-child::before {
+  content: "Start typing...";
+  color: #9aa0a6;
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+/* Paragraph spacing */
+.custom-md-editor .ProseMirror p {
+  margin: 0 0 10pt 0;
+}
+
+/* Headings styling - Google Docs proportions */
+.custom-md-editor .ProseMirror h1 {
+  font-size: 26pt;
+  font-weight: 400;
+  margin: 20pt 0 6pt 0;
+  line-height: 1.15;
+  color: #202124;
+}
+
+.custom-md-editor .ProseMirror h2 {
+  font-size: 20pt;
+  font-weight: 400;
+  margin: 18pt 0 6pt 0;
+  line-height: 1.15;
+  color: #202124;
+}
+
+.custom-md-editor .ProseMirror h3 {
+  font-size: 16pt;
+  font-weight: 400;
+  margin: 16pt 0 4pt 0;
+  line-height: 1.15;
+  color: #202124;
+}
+
+.custom-md-editor .ProseMirror h4 {
+  font-size: 14pt;
+  font-weight: 600;
+  margin: 14pt 0 4pt 0;
+  line-height: 1.15;
+  color: #202124;
+}
+
+/* Lists - Google Docs spacing */
+.custom-md-editor .ProseMirror ul,
+.custom-md-editor .ProseMirror ol {
+  padding-left: 30px;
+  margin: 0 0 10pt 0;
+}
+
+.custom-md-editor .ProseMirror li {
+  margin: 0 0 4pt 0;
+}
+
+.custom-md-editor .ProseMirror li p {
+  margin: 0;
+}
+
+/* Code blocks - subtle and clean */
+.custom-md-editor .ProseMirror pre {
+  background: #f8f9fa;
+  border: 1px solid #dadce0;
+  border-radius: 4px;
+  color: #202124;
+  font-family: 'Roboto Mono', 'Courier New', monospace;
+  font-size: 10pt;
+  padding: 12px 16px;
+  margin: 10pt 0;
+  overflow-x: auto;
+  line-height: 1.5;
+}
+
+.custom-md-editor .ProseMirror code {
+  background-color: #f1f3f4;
+  border-radius: 3px;
+  color: #d73a49;
+  font-family: 'Roboto Mono', 'Courier New', monospace;
+  font-size: 0.9em;
+  padding: 2px 6px;
+}
+
+/* Inline code shouldn't have background inside pre blocks */
+.custom-md-editor .ProseMirror pre code {
+  background: none;
+  color: inherit;
+  padding: 0;
+  font-size: inherit;
+}
+
+/* Horizontal rule */
+.custom-md-editor .ProseMirror hr {
+  border: none;
+  border-top: 1px solid #dadce0;
+  margin: 12pt 0;
+}
+
+/* Links - Google Docs blue */
+.custom-md-editor .ProseMirror a {
+  color: #1a73e8;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.custom-md-editor .ProseMirror a:hover {
+  text-decoration: underline;
+  color: #1557b0;
+}
+
+/* Bold, italic, strike */
+.custom-md-editor .ProseMirror strong {
+  font-weight: 700;
+}
+
+.custom-md-editor .ProseMirror em {
+  font-style: italic;
+}
+
+.custom-md-editor .ProseMirror s {
+  text-decoration: line-through;
+}
+
+/* Blockquote - Google Docs style */
+.custom-md-editor .ProseMirror blockquote {
+  border-left: 3px solid #dadce0;
+  padding-left: 16px;
+  margin: 10pt 0;
+  color: #5f6368;
+  font-style: italic;
+}
+
+/* Focus state */
+.custom-md-editor .ProseMirror:focus {
+  outline: none;
+}
+
+/* Selection color - Google Docs blue */
+.custom-md-editor .ProseMirror ::selection {
+  background-color: #c2d7f5;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1100px) {
+  .custom-md-editor {
+    padding: 120px 20px 20px;
+  }
+
+  .custom-md-editor .w-md-editor {
+    padding: 48px 48px;
+  }
+}
+
+@media (max-width: 768px) {
+  .custom-md-editor .w-md-editor {
+    padding: 32px 24px;
+  }
+}

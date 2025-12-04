@@ -1,0 +1,65 @@
+/* For main div element */
+.landing-page-register {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #242424;
+}
+
+/* Central register box */
+.register-box {
+    background-color: #646;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    width: 300px;
+    text-align: center;
+    color: white;
+}
+
+/* The input field a user writes into */
+.input-register {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    border: 1px solid #555;
+    background-color: white;
+    color: rgb(0, 0, 0);
+    box-sizing: border-box;
+}
+
+/* The register button specifically */
+.register-button {
+    margin-top: 20px;
+    width: 100%;
+    background-color: #1a1a1a;
+    color: white;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: border-color 0.25s;
+}
+
+/* Make the border of the register button light up on hover */
+.register-button:hover {
+    border-color: #646cff;
+}
+
+/* Uniform look for text in register-box */
+.register-box-text {
+    margin-top: 20px;
+    font-size: 0.9em;
+}
+
+/* Link for user to login to an account */
+.login-link {
+    color: #646cff;
+    text-decoration: none;
+}
+
+/* Underline login link on hover */
+.login-link:hover {
+    text-decoration: underline;
+}
