@@ -37,7 +37,7 @@ const LoginPage = () => {
         email: response.data.email
       }));
 
-      navigate('/app');
+      navigate('/home');
 
     } catch (err) {
       console.error('Login failed:', err);
