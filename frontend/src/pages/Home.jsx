@@ -101,11 +101,10 @@ const Home = () => {
       {/* Sidebar - Similar to Notion */}
       <div className="sidebar">
         <div className="sidebar-header">
-          <h2>NotNotion</h2>
+          <h3>Quick Access</h3>
         </div>
         <div className="sidebar-content">
           <div className="sidebar-section">
-            <h3>Quick Access</h3>
             <div className="sidebar-notes">
               {notes.slice(0, 10).map((note) => (
                 <div
