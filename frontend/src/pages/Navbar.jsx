@@ -1,9 +1,16 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import './css/Navbar.css';
 
 function Navbar() {
   const location = useLocation();
+  const [currentUser, setCurrentUser] = useState(null);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    const user = storedUser ? JSON.parse(storedUser) : null;
+    setCurrentUser(user);
+  }, []);
 
   return (
     <nav className="navbar">
@@ -20,21 +27,26 @@ function Navbar() {
         >
           Home
         </Link>
-        <Link 
-          to="/login" 
-          className={`navbar-link ${location.pathname === '/login' ? 'active' : ''}`}
-        >
-          Login
-        </Link>
-        <Link 
-          to="/register" 
-          className={`navbar-link navbar-link-register ${location.pathname === '/register' ? 'active' : ''}`}
-        >
-          Register
-        </Link>
+        {!currentUser && ( //change the conditional if you want to show the login and register buttons while signed in
+          <>
+            <Link 
+              to="/login" 
+              className={`navbar-link ${location.pathname === '/login' ? 'active' : ''}`}
+            >
+              Login
+            </Link>
+            <Link 
+              to="/register" 
+              className={`navbar-link navbar-link-register ${location.pathname === '/register' ? 'active' : ''}`}
+            >
+              Register
+            </Link>
+          </>
+        )}
       </div>
     </nav>
   );
 }
 
 export default Navbar;
+
