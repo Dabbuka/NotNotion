@@ -5,7 +5,7 @@ import app from "./app.js";
 //Establish access to database
 connectDB();
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Backend server initialized and running on port ${PORT}`);
 });
