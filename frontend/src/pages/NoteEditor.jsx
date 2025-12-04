@@ -151,6 +151,7 @@ function NoteEditor() {
         <button className="save-button" onClick={handleSave}>
           Save Document
         </button>
+        <p className="button-border"> | </p>
         <button onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()}>
           H1
         </button>
@@ -181,6 +182,7 @@ function NoteEditor() {
         <button onClick={() => editor?.chain().focus().toggleCodeBlock().run()}>
           Code
         </button>
+        <p className="button-border"> | </p>
       </div>
       <div className="w-md-editor">
         <EditorContent editor={editor} className="editor-content" />
