@@ -1,6 +1,5 @@
 import express from "express";
 import cors from "cors";
-import { createFolder, getFolder, renameFolder, addFolder } from "./controllers/folderController.js";
 import noteRoutes from "./routes/noteRoutes.js";
 import folderRoutes from "./routes/folderRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
@@ -18,11 +17,5 @@ app.get('/', (req, res) => {
 app.use("/api/notes", noteRoutes);
 app.use("/api/folders", folderRoutes);
 app.use("/api/users", userRoutes);
-
-//TODO: rename the routes to be more appropriate once connected to frontend and backend
-app.post("/createFolder", createFolder);
-app.get("/renameFolder", renameFolder);
-app.get("/:id", getFolder);
-app.patch("/renameFolder", addFolder);
 
 export default app;
