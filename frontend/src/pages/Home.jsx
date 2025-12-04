@@ -10,11 +10,15 @@ const Home = () => {
   const [sortBy, setSortBy] = useState('lastModified'); // 'name', 'date', 'lastModified'
   const [newNoteTitle, setNewNoteTitle] = useState('');
   const [showNewNoteForm, setShowNewNoteForm] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
   const navigate = useNavigate();
 
-  // Fetch all notes on component mount
+  // Load current user and fetch notes on component mount
   useEffect(() => {
-    fetchNotes();
+    const storedUser = localStorage.getItem('user');
+    const user = storedUser ? JSON.parse(storedUser) : null;
+    setCurrentUser(user);
+    fetchNotes(user);
   }, []);
 
   // Filter and sort notes when search query, sortBy, or notes change
@@ -46,9 +50,16 @@ const Home = () => {
     setFilteredNotes(sorted);
   }, [searchQuery, sortBy, notes]);
 
-  const fetchNotes = async () => {
+  
+
+  const fetchNotes = async (userFromArg) => {
     try {
-      const response = await axios.get('/api/notes/all');
+      const user = userFromArg || currentUser;
+      if (!user?._id) return; // or redirect to login
+  
+      const response = await axios.get('/api/notes/all', {
+        params: { userID: user._id },
+      });
       setNotes(response.data);
     } catch (error) {
       console.error('Error fetching notes:', error);
@@ -60,9 +71,19 @@ const Home = () => {
     if (!newNoteTitle.trim()) return;
 
     try {
+      const storedUser = localStorage.getItem('user');
+      const user = storedUser ? JSON.parse(storedUser) : null;
+
+      if (!user?._id) {
+        alert("You must be logged in to create a document.");
+        return;
+      }
+
+
       const response = await axios.post('/api/notes/createNote', {
         title: newNoteTitle,
-        content: ''
+        content: '',
+        userID: user._id,
       });
       
       // Add the new note to the list
@@ -128,7 +149,7 @@ const Home = () => {
 
       {/* Main Content Area */}
       <div className="main-content">
-        {/* Header with Search and Sort */}
+        {/* Header with Search, Sort and User */}
         <div className="home-header">
           <div className="search-container">
             <input
@@ -154,6 +175,12 @@ const Home = () => {
               <option value="date">Date Created</option>
             </select>
           </div>
+
+          {currentUser && (
+            <div className="user-greeting">
+              <span>Welcome, <strong>{currentUser.username}</strong></span>
+            </div>
+          )}
         </div>
 
         {/* Add New Document Section */}

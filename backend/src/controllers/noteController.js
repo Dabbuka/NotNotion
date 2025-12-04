@@ -3,21 +3,40 @@ import Note from "../models/note.js";
 // POST
 export const createNote = async (req, res) => {
   try {
-    const { title, content } = req.body;
+    const { title, content, userID } = req.body;
 
     if (!title) {
       return res.status(400).json({ message: "Please include a title" });
     }
 
+    if (!userID) {
+      return res.status(400).json({ message: "userID is required to create a note" });
+    }
+
     const newNote = new Note({
       title: title,
       content: content,
+      userID: userID,
     });
 
     const savedNote = await newNote.save();
     res.status(201).json(savedNote);
   } catch (err) {
     console.error(err.message);
+    res.status(500).send("Server error");
+  }
+};
+
+export const getAllNotes = async (req, res) => {
+  try {
+    const { userID } = req.query;
+    if (!userID) {
+      return res.status(400).json({ message: "userID is required" });
+    }
+    const notes = await Note.find({ userID }).sort({ updatedAt: -1 });
+    res.status(200).json(notes);
+  } catch (err) {
+    console.error("Error fetching notes:", err.message);
     res.status(500).send("Server error");
   }
 };
