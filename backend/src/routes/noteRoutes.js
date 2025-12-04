@@ -1,5 +1,5 @@
 import express from "express"
-import { createNote, getNotes } from "../controllers/noteController.js";
+import { createNote, getNotes, updateNote } from "../controllers/noteController.js";
 
 const router = express.Router();
 
@@ -7,6 +7,7 @@ const router = express.Router();
 // '/' is used instead of '/api/notes' is because prefix is handled in app.js
 router.post("/createNote", createNote);
 router.get("/:id", getNotes);
+router.patch("/:id", updateNote);
 // router.post("/:id, updateNote") -- TODO
 
 export default router;
