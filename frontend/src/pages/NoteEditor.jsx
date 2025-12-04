@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
+import { useSearchParams } from 'react-router-dom'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Link from '@tiptap/extension-link'
@@ -8,10 +9,14 @@ import Dropcursor from '@tiptap/extension-dropcursor'
 import './css/NoteEditor.css'
 
 const SAVE_MODE = 'local'
+const FALLBACK_NOTE_ID = '6917d095d3794db386c18f88'
 
 function NoteEditor() {
-  const noteId = "6917d095d3794db386c18f88"
+  const [searchParams] = useSearchParams()
+  const activeNoteId = searchParams.get('noteId') || FALLBACK_NOTE_ID
+
   const [initialContent, setInitialContent] = useState("")
+  const [noteTitle, setNoteTitle] = useState("")
 
   const editor = useEditor({
     extensions: [
@@ -105,27 +110,33 @@ function NoteEditor() {
     async function loadNote() {
       try {
         let content = ''
+        let title = ''
+        const contentKey = `note-${activeNoteId}`
+        const titleKey = `note-title-${activeNoteId}`
 
         if (SAVE_MODE === 'backend') {
-          const res = await axios.get(`/api/notes/${noteId}`)
-          content = res.data.content
+          const res = await axios.get(`/api/notes/${activeNoteId}`)
+          content = res.data.content || ''
+          title = res.data.title || ''
         } else {
           // Load from localStorage instead
-          const localKey = `note-${noteId}`
-          const savedContent = localStorage.getItem(localKey)
-          content = savedContent || ''
-
+          content = localStorage.getItem(contentKey) || ''
+          title = localStorage.getItem(titleKey) || ''
         }
 
         setInitialContent(content)
+        setNoteTitle(title)
         if (editor) {
           editor.commands.setContent(content)
         }
       } catch (err) {
         console.error('Error loading note:', err)
-        const localKey = `note-${noteId}`
-        const savedContent = localStorage.getItem(localKey) || ''
+        const contentKey = `note-${activeNoteId}`
+        const titleKey = `note-title-${activeNoteId}`
+        const savedContent = localStorage.getItem(contentKey) || ''
+        const savedTitle = localStorage.getItem(titleKey) || ''
         setInitialContent(savedContent)
+        setNoteTitle(savedTitle)
         if (editor) {
           editor.commands.setContent(savedContent)
         }
@@ -133,14 +144,16 @@ function NoteEditor() {
     }
 
     loadNote()
-  }, [noteId, editor])
+  }, [activeNoteId, editor])
 
   const handleSave = () => {
     if (editor) {
       const content = editor.getHTML()
-      const localKey = `note-${noteId}`
+      const contentKey = `note-${activeNoteId}`
+      const titleKey = `note-title-${activeNoteId}`
 
-      localStorage.setItem(localKey, content)
+      localStorage.setItem(contentKey, content)
+      localStorage.setItem(titleKey, noteTitle)
       setInitialContent(content)
     }
   }
@@ -148,9 +161,18 @@ function NoteEditor() {
   return (
     <div className="custom-md-editor">
       <div className="w-md-editor-toolbar">
+        
         <button className="save-button" onClick={handleSave}>
           Save Document
         </button>
+        <input
+          className="title-box"
+          type="title"
+          name="title"
+          placeholder="Untitled Document"
+          value={noteTitle}
+          onChange={(e) => setNoteTitle(e.target.value)}
+        />
         <p className="button-border"> | </p>
         <button onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()}>
           H1
