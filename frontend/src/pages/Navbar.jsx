@@ -24,9 +24,16 @@ function Navbar() {
   return (
     <nav className="navbar">
       <div className="navbar-brand">
-        <Link to="/" className="navbar-logo">
-          NotNotion
-        </Link>
+        {currentUser ? (
+            <Link to="/home" className="navbar-logo">
+                NotNotion
+            </Link>
+
+        ) : (
+            <Link to="/" className="navbar-logo">
+            NotNotion
+            </Link>
+        )}
       </div>
       
       <div className="navbar-links">
@@ -45,7 +52,7 @@ function Navbar() {
             </button>
             </>
             
-        ) : ( //change the conditional if you want to show the login and register buttons while signed in
+        ) : (
           <>
             <Link 
               to="/login" 
