@@ -10,11 +10,15 @@ const Home = () => {
   const [sortBy, setSortBy] = useState('lastModified'); // 'name', 'date', 'lastModified'
   const [newNoteTitle, setNewNoteTitle] = useState('');
   const [showNewNoteForm, setShowNewNoteForm] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
   const navigate = useNavigate();
 
-  // Fetch all notes on component mount
+  // Load current user and fetch notes on component mount
   useEffect(() => {
-    fetchNotes();
+    const storedUser = localStorage.getItem('user');
+    const user = storedUser ? JSON.parse(storedUser) : null;
+    setCurrentUser(user);
+    fetchNotes(user);
   }, []);
 
   // Filter and sort notes when search query, sortBy, or notes change
@@ -46,9 +50,16 @@ const Home = () => {
     setFilteredNotes(sorted);
   }, [searchQuery, sortBy, notes]);
 
-  const fetchNotes = async () => {
+  
+
+  const fetchNotes = async (userFromArg) => {
     try {
-      const response = await axios.get('/api/notes/all');
+      const user = userFromArg || currentUser;
+      if (!user?._id) return; // or redirect to login
+  
+      const response = await axios.get('/api/notes/all', {
+        params: { userID: user._id },
+      });
       setNotes(response.data);
     } catch (error) {
       console.error('Error fetching notes:', error);
@@ -60,9 +71,19 @@ const Home = () => {
     if (!newNoteTitle.trim()) return;
 
     try {
+      const storedUser = localStorage.getItem('user');
+      const user = storedUser ? JSON.parse(storedUser) : null;
+
+      if (!user?._id) {
+        alert("You must be logged in to create a document.");
+        return;
+      }
+
+
       const response = await axios.post('/api/notes/createNote', {
         title: newNoteTitle,
-        content: ''
+        content: '',
+        userID: user._id,
       });
       
       // Add the new note to the list
@@ -101,9 +122,14 @@ const Home = () => {
       {/* Sidebar - Similar to Notion */}
       <div className="sidebar">
         <div className="sidebar-header">
-          <h3>Quick Access</h3>
+        {currentUser && (
+            <div className="user-greeting">
+              <h3><span><strong>{currentUser.username}</strong>'s Space</span></h3>
+            </div>
+          )}
         </div>
         <div className="sidebar-content">
+          <h4> Quick Access </h4>
           <div className="sidebar-section">
             <div className="sidebar-notes">
               {notes.slice(0, 10).map((note) => (
@@ -128,7 +154,7 @@ const Home = () => {
 
       {/* Main Content Area */}
       <div className="main-content">
-        {/* Header with Search and Sort */}
+        {/* Header with Search, Sort and User */}
         <div className="home-header">
           <div className="search-container">
             <input
@@ -154,6 +180,8 @@ const Home = () => {
               <option value="date">Date Created</option>
             </select>
           </div>
+
+          
         </div>
 
         {/* Add New Document Section */}
@@ -207,12 +235,12 @@ const Home = () => {
             </div>
           ) : (
             filteredNotes.map((note) => (
-              <div
-                key={note._id}
-                className="document-card"
-                onClick={() => handleNoteClick(note._id)}
-              >
-                <div className="document-icon">📄</div>
+              <div key={note._id} className="document-wrapper">
+                <div
+                  className="document-card"
+                  onClick={() => handleNoteClick(note._id)}
+                >
+                </div>
                 <div className="document-info">
                   <h3 className="document-title" title={note.title}>
                     {note.title}
@@ -220,12 +248,6 @@ const Home = () => {
                   <p className="document-meta">
                     {formatDate(note.updatedAt)}
                   </p>
-                  {note.content && (
-                    <p className="document-preview">
-                      {note.content.substring(0, 100)}
-                      {note.content.length > 100 ? '...' : ''}
-                    </p>
-                  )}
                 </div>
               </div>
             ))

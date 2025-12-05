@@ -8,7 +8,7 @@ const LandingPage = () => {
       <h1>Welcome to NotNotion</h1>
       <p>Your simple, powerful note-taking app</p>
       
-      <Link to="/app">
+      <Link to="/register">
         <button className="get-started-button">
           Get Started
         </button>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
+import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Link from '@tiptap/extension-link'
@@ -7,11 +8,22 @@ import Image from '@tiptap/extension-image'
 import Dropcursor from '@tiptap/extension-dropcursor'
 import './css/NoteEditor.css'
 
-const SAVE_MODE = 'local'
+const SAVE_MODE = 'backend'
 
 function NoteEditor() {
-  const noteId = "6917d095d3794db386c18f88"
+  const [searchParams] = useSearchParams()
+  const urlNoteId = searchParams.get('noteId')
+  
+  const storedUser = localStorage.getItem('user');
+  const user = storedUser ? JSON.parse(storedUser) : null;
+  const userId = user?._id;
+
+  const [noteId, setNoteId] = useState(urlNoteId || null)
   const [initialContent, setInitialContent] = useState("")
+  const [noteTitle, setNoteTitle] = useState("")
+  const [currentUser, setCurrentUser] = useState(user)
+  const [notes, setNotes] = useState([])
+  const navigate = useNavigate()
 
   const editor = useEditor({
     extensions: [
@@ -102,45 +114,157 @@ function NoteEditor() {
   })
 
   useEffect(() => {
+    // Update noteId when URL parameter changes
+    const urlNoteId = searchParams.get('noteId')
+    setNoteId(urlNoteId || null)
+  }, [searchParams])
+
+  // Fetch notes for sidebar
+  useEffect(() => {
+    fetchNotes()
+  }, [])
+
+  const fetchNotes = async () => {
+    try {
+      if (!userId) return;
+      const response = await axios.get('/api/notes/all', {
+        params: { userID: userId },
+      });
+      setNotes(response.data);
+    } catch (error) {
+      console.error('Error fetching notes:', error);
+    }
+  };
+
+  const handleNoteClick = (clickedNoteId) => {
+    navigate(`/app?noteId=${clickedNoteId}`);
+  };
+
+  useEffect(() => {
+    if (!userId) {
+      console.error('User not logged in');
+      return;
+    }
+    if (!editor) {
+      return;
+    }
     async function loadNote() {
       try {
         let content = ''
+        let title = ''
+        let loadedNoteId = null
 
         if (SAVE_MODE === 'backend') {
-          const res = await axios.get(`/api/notes/${noteId}`)
-          content = res.data.content
+          // If a specific noteId is provided (from URL or state), load that note
+          // Otherwise, load the most recent note
+          if (noteId) {
+            const res = await axios.get(`/api/notes/${noteId}`)
+            content = res.data.content || ''
+            title = res.data.title || ''
+            loadedNoteId = res.data._id || null
+          } else {
+            // No specific note requested, load the most recent note
+            const res = await axios.get(`/api/notes/user/${userId}`)
+            content = res.data.content || ''
+            title = res.data.title || ''
+            loadedNoteId = res.data._id || null
+          }
+          setNoteId(loadedNoteId)
         } else {
           // Load from localStorage instead
-          const localKey = `note-${noteId}`
-          const savedContent = localStorage.getItem(localKey)
-          content = savedContent || ''
-
+          // For localStorage mode, we'd need a different approach to get the most recent note
+          // For now, fallback to empty if no noteId is available
+          if (noteId) {
+            const contentKey = `note-${noteId}`
+            const titleKey = `note-title-${noteId}`
+            const savedContent = localStorage.getItem(contentKey)
+            const savedTitle = localStorage.getItem(titleKey)
+            content = savedContent || ''
+            title = savedTitle || ''
+          }
         }
 
         setInitialContent(content)
+        setNoteTitle(title)
         if (editor) {
           editor.commands.setContent(content)
         }
       } catch (err) {
         console.error('Error loading note:', err)
-        const localKey = `note-${noteId}`
-        const savedContent = localStorage.getItem(localKey) || ''
-        setInitialContent(savedContent)
-        if (editor) {
-          editor.commands.setContent(savedContent)
+        // If no notes exist for the user, start with empty note
+        if (err.response?.status === 404) {
+          setInitialContent('')
+          setNoteTitle('')
+          if (editor) {
+            editor.commands.setContent('')
+          }
+        } else {
+          // Fallback to localStorage if backend fails
+          if (noteId) {
+            const contentKey = `note-${noteId}`
+            const titleKey = `note-title-${noteId}`
+            const savedContent = localStorage.getItem(contentKey) || ''
+            const savedTitle = localStorage.getItem(titleKey) || ''
+            setInitialContent(savedContent)
+            setNoteTitle(savedTitle)
+            if (editor) {
+              editor.commands.setContent(savedContent)
+            }
+          }
         }
       }
     }
 
     loadNote()
-  }, [noteId, editor])
+  }, [userId, editor, noteId])
 
-  const handleSave = () => {
-    if (editor) {
-      const content = editor.getHTML()
-      const localKey = `note-${noteId}`
+  const handleSave = async () => {
+    if (!editor) {
+      return;
+    }
+    
+    const content = editor.getHTML()
 
-      localStorage.setItem(localKey, content)
+    if (SAVE_MODE === 'backend') {
+      try {
+        if (noteId) {
+          // Update existing note
+          await axios.patch(`/api/notes/${noteId}`, {
+            title: noteTitle,
+            content: content
+          })
+        } else {
+          // Create new note if no noteId exists
+          if (!userId) {
+            console.error('User not logged in');
+            return;
+          }
+          const res = await axios.post('/api/notes/createNote', {
+            title: noteTitle || 'Untitled',
+            content: content,
+            userID: userId
+          })
+          setNoteId(res.data._id)
+        }
+        setInitialContent(content)
+      } catch (err) {
+        console.error('Error saving note:', err)
+        // Fallback to localStorage on error
+        if (noteId) {
+          const contentKey = `note-${noteId}`
+          const titleKey = `note-title-${noteId}`
+          localStorage.setItem(contentKey, content)
+          localStorage.setItem(titleKey, noteTitle)
+        }
+      }
+    } else {
+      // Save to localStorage
+      if (noteId) {
+        const contentKey = `note-${noteId}`
+        const titleKey = `note-title-${noteId}`
+        localStorage.setItem(contentKey, content)
+        localStorage.setItem(titleKey, noteTitle)
+      }
       setInitialContent(content)
     }
   }
@@ -148,47 +272,89 @@ function NoteEditor() {
   return (
     <div className="custom-md-editor">
       <div className="w-md-editor-toolbar">
-        <button className="save-button" onClick={handleSave}>
-          Save Document
-        </button>
-        <p className="button-border"> | </p>
-        <button onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()}>
-          H1
-        </button>
-        <button onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}>
-          H2
-        </button>
-        <button onClick={() => editor?.chain().focus().toggleHeading({ level: 3 }).run()}>
-          H3
-        </button>
-        <button onClick={() => editor?.chain().focus().toggleBold().run()}>
-          Bold
-        </button>
-        <button onClick={() => editor?.chain().focus().toggleItalic().run()}>
-          Italic
-        </button>
-        <button onClick={() => editor?.chain().focus().toggleStrike().run()}>
-          Strike
-        </button>
-        <button onClick={() => editor?.chain().focus().setHorizontalRule().run()}>
-          HR
-        </button>
-        <button onClick={() => editor?.chain().focus().toggleBulletList().run()}>
-          • List
-        </button>
-        <button onClick={() => editor?.chain().focus().toggleOrderedList().run()}>
-          1. List
-        </button>
-        <button onClick={() => editor?.chain().focus().toggleCodeBlock().run()}>
-          Code
-        </button>
-        <p className="button-border"> | </p>
-      </div>
-      <div className="w-md-editor">
-        <EditorContent editor={editor} className="editor-content" />
+        <div className="toolbar-left">
+          <input
+            type="text"
+            className="note-title-input"
+            placeholder="Untitled document"
+            value={noteTitle}
+            onChange={(e) => setNoteTitle(e.target.value)}
+          />
+          <button className="save-button" onClick={handleSave}>
+            Save
+          </button>
+        </div>
+        <div className="toolbar-center">
+          <p className="button-border"> | </p>
+          <button onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()}>
+            H1
+          </button>
+          <button onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}>
+            H2
+          </button>
+          <button onClick={() => editor?.chain().focus().toggleHeading({ level: 3 }).run()}>
+            H3
+          </button>
+          <button onClick={() => editor?.chain().focus().toggleBold().run()}>
+            Bold
+          </button>
+          <button onClick={() => editor?.chain().focus().toggleItalic().run()}>
+            Italic
+          </button>
+          <button onClick={() => editor?.chain().focus().toggleStrike().run()}>
+            Strike
+          </button>
+          <button onClick={() => editor?.chain().focus().setHorizontalRule().run()}>
+            HR
+          </button>
+          <button onClick={() => editor?.chain().focus().toggleBulletList().run()}>
+            • List
+          </button>
+          <button onClick={() => editor?.chain().focus().toggleOrderedList().run()}>
+            1. List
+          </button>
+          <button onClick={() => editor?.chain().focus().toggleCodeBlock().run()}>
+            Code
+          </button>
+          <p className="button-border"> | </p>
+        </div>
+        </div>
+      <div className="editor-layout">
+        {/* Sidebar - Similar to Notion */}
+        <div className="sidebar">
+          <div className="sidebar-content">
+            <h4> Quick Access </h4>
+            <div className="sidebar-section">
+              <div className="sidebar-notes">
+                {notes.slice(0, 10).map((note) => (
+                  <div
+                    key={note._id}
+                    className="sidebar-note-item"
+                    onClick={() => handleNoteClick(note._id)}
+                  >
+                    <span className="sidebar-note-icon">📄</span>
+                    <span className="sidebar-note-title" title={note.title}>
+                      {note.title.length > 20 ? note.title.substring(0, 20) + '...' : note.title}
+                    </span>
+                  </div>
+                ))}
+                {notes.length === 0 && (
+                  <div className="sidebar-empty">No documents yet</div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="editor-wrapper">
+          <div className="w-md-editor">
+            <EditorContent editor={editor} className="editor-content" />
+          </div>
+        </div>
       </div>
     </div>
   )
 }
 
 export default NoteEditor
+
+

@@ -44,9 +44,8 @@
   background-color: #242424;
   display: flex;
   flex-direction: column;
-  align-items: center;
   /* Extra top padding to account for navbar (70px) + toolbar height (~50px) */
-  padding: 120px 40px 20px;
+  padding-top: 120px;
   box-sizing: border-box;
 }
 
@@ -61,7 +60,7 @@
 .custom-md-editor .w-md-editor-toolbar {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   gap: 4px;
   padding:0px 16px;
   width: 100%;
@@ -85,12 +84,133 @@
   max-height: 45px;
 }
 
+/* Left section - Save button and title */
+.custom-md-editor .toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Center section - Tool buttons */
+.custom-md-editor .toolbar-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  flex: 1;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Editor layout container */
+.custom-md-editor .editor-layout {
+  display: flex;
+  width: 100%;
+  min-height: calc(100vh - 115px);
+  margin-top: 45px;
+  position: relative;
+}
+
+/* Sidebar styles - fixed on the left */
+.custom-md-editor .sidebar {
+  position: fixed;
+  left: 0;
+  top: 115px;
+  width: 280px;
+  height: calc(100vh - 115px);
+  background-color: #646;
+  border-right: 1px solid #333;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  z-index: 1;
+}
+
+.custom-md-editor .sidebar-header {
+  padding: 20px;
+  border-bottom: 1px solid #333;
+}
+
+.custom-md-editor .sidebar-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.87);
+}
+
+.custom-md-editor .sidebar-content {
+  flex: 1;
+  padding: 20px;
+}
+
+.custom-md-editor .sidebar-content h4 {
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  color: #ccc;
+  margin-bottom: 12px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+.custom-md-editor .sidebar-notes {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.custom-md-editor .sidebar-note-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.custom-md-editor .sidebar-note-item:hover {
+  background-color: #70707046;
+}
+
+.custom-md-editor .sidebar-note-icon {
+  font-size: 1rem;
+}
+
+.custom-md-editor .sidebar-note-title {
+  flex: 1;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.custom-md-editor .sidebar-empty {
+  color: #666;
+  font-size: 0.9rem;
+  padding: 8px 12px;
+  font-style: italic;
+}
+
+/* Editor wrapper - centers the editor */
+.custom-md-editor .editor-wrapper {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-left: 280px; /* Account for sidebar width */
+  padding: 0 40px;
+  box-sizing: border-box;
+}
+
 /* Document container - same width as toolbar */
 .custom-md-editor .w-md-editor {
-  max-width: 900px;
+  min-width: 900px;
   /* Matches toolbar width */
   width: 100%;
-  min-height: calc(100vh - 100px);
+  min-height: calc(100vh - 115px);
   background-color: #ffffff;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   padding: 90px 100px;
@@ -100,8 +220,9 @@
   border-radius: 0 0 8px 8px;
   border-top: none;
   box-sizing: border-box;
-  margin: 0 auto;
-  margin-top: 15px;
+  justify-content: center;
+  margin-left: 260px;
+  overflow-y: auto;
   /* Center the document */
 }
 
@@ -125,6 +246,17 @@
 
 .custom-md-editor .button-border {
   font-size: 20px;
+}
+
+
+.custom-md-editor .note-title-input {
+  background-color: transparent;
+  color: rgb(255, 255, 255);
+  border: 2px solid rgb(155, 155, 155);
+  padding: 5px 8px;
+  border-radius: 4px;
+  font-size: 18px;
+  font-weight: bold;
 }
 
 .custom-md-editor .save-button:hover {

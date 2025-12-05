@@ -65,12 +65,12 @@
   }
   
   .navbar-link-register:hover {
-    background-color: #1557b0;
+    background-color: rgb(68, 42, 68);
     color: #ffffff !important;
   }
    
   .navbar-link-register.active {
-    background-color: #1557b0;
+    background-color: rgb(68, 42, 68);
     color: #ffffff !important;
   }
   
@@ -88,4 +88,22 @@
       padding: 6px 12px;
       font-size: 13px;
     }
+  }
+
+  .navbar-link-logout {
+    background-color: #646;;
+    border: 1px solid #dadce0;
+    color: white;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 8px 16px;
+    border-radius: 6px;
+    transition: all 0.2s;
+  }
+  
+  .navbar-link-logout:hover {
+    background-color: rgb(68, 42, 68);
+    color: white;
   }
