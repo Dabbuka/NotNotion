@@ -30,7 +30,6 @@ const Home = () => {
       fetchNotes(user);
       fetchFolders(user);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Fetch folder contents when URL folder parameter changes
@@ -473,7 +472,7 @@ const Home = () => {
                       }
                     }}
                   >
-                    {isFolder && <span className="folder-card-icon">📁</span>}
+                    {isFolder && <span className="folder-card-icon"></span>}
                   </div>
                   <div className="document-info">
                     <h3 className="document-title" title={itemTitle}>
