@@ -235,12 +235,8 @@ const Home = () => {
             </div>
           ) : (
             filteredNotes.map((note) => (
-              <div key={note._id} className="document-wrapper">
-                <div
-                  className="document-card"
-                  onClick={() => handleNoteClick(note._id)}
-                >
-                </div>
+              <div key={note._id} className="document-wrapper" onClick={() => handleNoteClick(note._id)}>
+                <div className="document-card" ></div>
                 <div className="document-info">
                   <h3 className="document-title" title={note.title}>
                     {note.title}
