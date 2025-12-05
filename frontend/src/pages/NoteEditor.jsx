@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
+import { useSearchParams } from 'react-router-dom'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Link from '@tiptap/extension-link'
@@ -10,11 +11,14 @@ import './css/NoteEditor.css'
 const SAVE_MODE = 'backend'
 
 function NoteEditor() {
+  const [searchParams] = useSearchParams()
+  const urlNoteId = searchParams.get('noteId')
+  
   const storedUser = localStorage.getItem('user');
   const user = storedUser ? JSON.parse(storedUser) : null;
   const userId = user?._id;
 
-  const [noteId, setNoteId] = useState(null)
+  const [noteId, setNoteId] = useState(urlNoteId || null)
   const [initialContent, setInitialContent] = useState("")
   const [noteTitle, setNoteTitle] = useState("")
 
@@ -107,6 +111,12 @@ function NoteEditor() {
   })
 
   useEffect(() => {
+    // Update noteId when URL parameter changes
+    const urlNoteId = searchParams.get('noteId')
+    setNoteId(urlNoteId || null)
+  }, [searchParams])
+
+  useEffect(() => {
     if (!userId) {
       console.error('User not logged in');
       return;
@@ -121,10 +131,20 @@ function NoteEditor() {
         let loadedNoteId = null
 
         if (SAVE_MODE === 'backend') {
-          const res = await axios.get(`/api/notes/user/${userId}`)
-          content = res.data.content || ''
-          title = res.data.title || ''
-          loadedNoteId = res.data._id || null
+          // If a specific noteId is provided (from URL or state), load that note
+          // Otherwise, load the most recent note
+          if (noteId) {
+            const res = await axios.get(`/api/notes/${noteId}`)
+            content = res.data.content || ''
+            title = res.data.title || ''
+            loadedNoteId = res.data._id || null
+          } else {
+            // No specific note requested, load the most recent note
+            const res = await axios.get(`/api/notes/user/${userId}`)
+            content = res.data.content || ''
+            title = res.data.title || ''
+            loadedNoteId = res.data._id || null
+          }
           setNoteId(loadedNoteId)
         } else {
           // Load from localStorage instead
@@ -172,7 +192,7 @@ function NoteEditor() {
     }
 
     loadNote()
-  }, [userId, editor])
+  }, [userId, editor, noteId])
 
   const handleSave = async () => {
     if (!editor) {
