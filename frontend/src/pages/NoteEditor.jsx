@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Link from '@tiptap/extension-link'
@@ -21,6 +21,9 @@ function NoteEditor() {
   const [noteId, setNoteId] = useState(urlNoteId || null)
   const [initialContent, setInitialContent] = useState("")
   const [noteTitle, setNoteTitle] = useState("")
+  const [currentUser, setCurrentUser] = useState(user)
+  const [notes, setNotes] = useState([])
+  const navigate = useNavigate()
 
   const editor = useEditor({
     extensions: [
@@ -115,6 +118,27 @@ function NoteEditor() {
     const urlNoteId = searchParams.get('noteId')
     setNoteId(urlNoteId || null)
   }, [searchParams])
+
+  // Fetch notes for sidebar
+  useEffect(() => {
+    fetchNotes()
+  }, [])
+
+  const fetchNotes = async () => {
+    try {
+      if (!userId) return;
+      const response = await axios.get('/api/notes/all', {
+        params: { userID: userId },
+      });
+      setNotes(response.data);
+    } catch (error) {
+      console.error('Error fetching notes:', error);
+    }
+  };
+
+  const handleNoteClick = (clickedNoteId) => {
+    navigate(`/app?noteId=${clickedNoteId}`);
+  };
 
   useEffect(() => {
     if (!userId) {
@@ -248,55 +272,89 @@ function NoteEditor() {
   return (
     <div className="custom-md-editor">
       <div className="w-md-editor-toolbar">
-        
-        <button className="save-button" onClick={handleSave}>
-          Save Document
-        </button>
-        <input
-          type="text"
-          className="note-title-input"
-          placeholder="Untitled document"
-          value={noteTitle}
-          onChange={(e) => setNoteTitle(e.target.value)}
-        />
-        <p className="button-border"> | </p>
-        <button onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()}>
-          H1
-        </button>
-        <button onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}>
-          H2
-        </button>
-        <button onClick={() => editor?.chain().focus().toggleHeading({ level: 3 }).run()}>
-          H3
-        </button>
-        <button onClick={() => editor?.chain().focus().toggleBold().run()}>
-          Bold
-        </button>
-        <button onClick={() => editor?.chain().focus().toggleItalic().run()}>
-          Italic
-        </button>
-        <button onClick={() => editor?.chain().focus().toggleStrike().run()}>
-          Strike
-        </button>
-        <button onClick={() => editor?.chain().focus().setHorizontalRule().run()}>
-          HR
-        </button>
-        <button onClick={() => editor?.chain().focus().toggleBulletList().run()}>
-          • List
-        </button>
-        <button onClick={() => editor?.chain().focus().toggleOrderedList().run()}>
-          1. List
-        </button>
-        <button onClick={() => editor?.chain().focus().toggleCodeBlock().run()}>
-          Code
-        </button>
-        <p className="button-border"> | </p>
-      </div>
-      <div className="w-md-editor">
-        <EditorContent editor={editor} className="editor-content" />
+        <div className="toolbar-left">
+          <input
+            type="text"
+            className="note-title-input"
+            placeholder="Untitled document"
+            value={noteTitle}
+            onChange={(e) => setNoteTitle(e.target.value)}
+          />
+          <button className="save-button" onClick={handleSave}>
+            Save
+          </button>
+        </div>
+        <div className="toolbar-center">
+          <p className="button-border"> | </p>
+          <button onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()}>
+            H1
+          </button>
+          <button onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}>
+            H2
+          </button>
+          <button onClick={() => editor?.chain().focus().toggleHeading({ level: 3 }).run()}>
+            H3
+          </button>
+          <button onClick={() => editor?.chain().focus().toggleBold().run()}>
+            Bold
+          </button>
+          <button onClick={() => editor?.chain().focus().toggleItalic().run()}>
+            Italic
+          </button>
+          <button onClick={() => editor?.chain().focus().toggleStrike().run()}>
+            Strike
+          </button>
+          <button onClick={() => editor?.chain().focus().setHorizontalRule().run()}>
+            HR
+          </button>
+          <button onClick={() => editor?.chain().focus().toggleBulletList().run()}>
+            • List
+          </button>
+          <button onClick={() => editor?.chain().focus().toggleOrderedList().run()}>
+            1. List
+          </button>
+          <button onClick={() => editor?.chain().focus().toggleCodeBlock().run()}>
+            Code
+          </button>
+          <p className="button-border"> | </p>
+        </div>
+        </div>
+      <div className="editor-layout">
+        {/* Sidebar - Similar to Notion */}
+        <div className="sidebar">
+          <div className="sidebar-content">
+            <h4> Quick Access </h4>
+            <div className="sidebar-section">
+              <div className="sidebar-notes">
+                {notes.slice(0, 10).map((note) => (
+                  <div
+                    key={note._id}
+                    className="sidebar-note-item"
+                    onClick={() => handleNoteClick(note._id)}
+                  >
+                    <span className="sidebar-note-icon">📄</span>
+                    <span className="sidebar-note-title" title={note.title}>
+                      {note.title.length > 20 ? note.title.substring(0, 20) + '...' : note.title}
+                    </span>
+                  </div>
+                ))}
+                {notes.length === 0 && (
+                  <div className="sidebar-empty">No documents yet</div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="editor-wrapper">
+          <div className="w-md-editor">
+            <EditorContent editor={editor} className="editor-content" />
+          </div>
+        </div>
       </div>
     </div>
   )
 }
 
 export default NoteEditor
+
+
