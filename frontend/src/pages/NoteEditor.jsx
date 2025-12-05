@@ -23,6 +23,7 @@ function NoteEditor() {
   const [initialContent, setInitialContent] = useState("")
   const [noteTitle, setNoteTitle] = useState("")
   const [folders, setFolders] = useState([])
+  const [notes, setNotes] = useState([])
   const navigate = useNavigate()
 
   const editor = useEditor({
@@ -119,7 +120,7 @@ function NoteEditor() {
     setNoteId(urlNoteId || null)
   }, [searchParams])
 
-  // Fetch folders for sidebar
+  // Fetch folders and notes for sidebar
   useEffect(() => {
     const fetchFolders = async () => {
       try {
@@ -132,12 +133,31 @@ function NoteEditor() {
         console.error('Error fetching folders:', error);
       }
     };
+
+    const fetchNotes = async () => {
+      try {
+        if (!userId) return;
+        const response = await axios.get('/api/notes/all', {
+          params: { userID: userId },
+        });
+        setNotes(response.data);
+      } catch (error) {
+        console.error('Error fetching notes:', error);
+      }
+    };
+
     fetchFolders();
+    fetchNotes();
   }, [userId]);
 
   const handleFolderClick = (folderId) => {
     // Navigate to home page with folder context
     navigate(`/home?folder=${folderId}`);
+  };
+
+  const handleNoteClick = (clickedNoteId) => {
+    // Navigate to the clicked note
+    navigate(`/app?noteId=${clickedNoteId}`);
   };
 
   useEffect(() => {
@@ -325,8 +345,11 @@ function NoteEditor() {
           <div className="sidebar-content">
             <FolderTree
               folders={folders}
+              notes={notes}
               currentFolderId={null}
+              currentNoteId={noteId}
               onFolderClick={handleFolderClick}
+              onNoteClick={handleNoteClick}
             />
           </div>
         </div>

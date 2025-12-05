@@ -84,3 +84,25 @@
   font-style: italic;
 }
 
+/* Note row styling */
+.folder-tree-row.note-row {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.folder-tree-row.note-row:hover {
+  background-color: #2a2a2a;
+}
+
+.folder-tree-row.note-row.active {
+  background-color: #1a73e8;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.folder-tree-row.note-row .folder-name {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.folder-tree-row.note-row.active .folder-name {
+  color: rgba(255, 255, 255, 0.95);
+}
+
