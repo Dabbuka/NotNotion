@@ -11,9 +11,22 @@ const FolderSchema = new Schema({
     ref: 'User',
     required: true
   },
-  notes: [{
+  parentFolderID: {
     type: Schema.Types.ObjectId,
-    ref: 'Notes',
+    ref: 'Folder',
+    default: null
+  },
+  items: [{
+    item: {
+      type: Schema.Types.ObjectId,
+      required: true,
+      refPath: 'items.itemType'
+    },
+    itemType: {
+      type: String,
+      required: true,
+      enum: ['Note', 'Folder']
+    }
   }],
 }, {
   timestamps: true
