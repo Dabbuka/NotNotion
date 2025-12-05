@@ -4,7 +4,7 @@ import Note from "../models/note.js";
 // POST
 export const createNote = async (req, res) => {
   try {
-    const { title, content, userID } = req.body;
+    const { title, content, userID, folderID } = req.body;
 
     if (!title) {
       return res.status(400).json({ message: "Please include a title" });
@@ -18,6 +18,7 @@ export const createNote = async (req, res) => {
       title: title,
       content: content,
       userID: userID,
+      folderID: folderID || null,
     });
 
     const savedNote = await newNote.save();

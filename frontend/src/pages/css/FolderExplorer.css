@@ -1,0 +1,101 @@
+.folder-explorer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0; /* Allow flex child to shrink */
+}
+
+.folder-explorer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border-bottom: 1px solid #333;
+  margin-bottom: 8px;
+}
+
+.folder-explorer-header h4 {
+  margin: 0;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  color: #ccc;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  flex: 1;
+}
+
+.parent-directory-button {
+  background: #646;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 12px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.parent-directory-button:hover {
+  background-color: #858;
+}
+
+.folder-explorer-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0 8px;
+  min-height: 0; /* Allow flex child to shrink */
+}
+
+.folder-explorer-items {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.folder-explorer-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  user-select: none;
+}
+
+.folder-explorer-item:hover {
+  background-color: #2a2a2a;
+}
+
+.folder-explorer-item.folder-item:hover {
+  background-color: #2a2a2a;
+}
+
+.folder-explorer-item.file-item:hover {
+  background-color: #2a2a2a;
+}
+
+.folder-explorer-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.folder-explorer-name {
+  flex: 1;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.folder-explorer-empty {
+  color: #666;
+  font-size: 0.9rem;
+  padding: 20px 12px;
+  text-align: center;
+  font-style: italic;
+}
+

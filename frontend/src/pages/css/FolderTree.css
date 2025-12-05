@@ -1,0 +1,108 @@
+.folder-tree {
+  margin-top: 20px;
+}
+
+.folder-tree-header {
+  padding: 8px 12px;
+  border-bottom: 1px solid #333;
+  margin-bottom: 8px;
+}
+
+.folder-tree-header h4 {
+  margin: 0;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  color: #ccc;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+.folder-tree-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.folder-tree-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.folder-tree-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  user-select: none;
+}
+
+.folder-tree-row:hover {
+  background-color: #2a2a2a;
+}
+
+.folder-tree-row.active {
+  background-color: #646;
+}
+
+.folder-expand-icon {
+  font-size: 0.7rem;
+  color: #999;
+  width: 12px;
+  cursor: pointer;
+  display: inline-block;
+}
+
+.folder-expand-icon-spacer {
+  width: 12px;
+  display: inline-block;
+}
+
+.folder-icon {
+  font-size: 1rem;
+}
+
+.folder-name {
+  flex: 1;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.folder-children {
+  display: flex;
+  flex-direction: column;
+}
+
+.folder-tree-empty {
+  color: #666;
+  font-size: 0.9rem;
+  padding: 8px 12px;
+  font-style: italic;
+}
+
+/* Note row styling */
+.folder-tree-row.note-row {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.folder-tree-row.note-row:hover {
+  background-color: #2a2a2a;
+}
+
+.folder-tree-row.note-row.active {
+  background-color: #1a73e8;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.folder-tree-row.note-row .folder-name {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.folder-tree-row.note-row.active .folder-name {
+  color: rgba(255, 255, 255, 0.95);
+}
+

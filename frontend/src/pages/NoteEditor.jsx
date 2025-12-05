@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import axios from 'axios'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useEditor, EditorContent } from '@tiptap/react'
@@ -6,6 +6,7 @@ import StarterKit from '@tiptap/starter-kit'
 import Link from '@tiptap/extension-link'
 import Image from '@tiptap/extension-image'
 import Dropcursor from '@tiptap/extension-dropcursor'
+import FolderTree from './FolderTree'
 import './css/NoteEditor.css'
 
 const SAVE_MODE = 'backend'
@@ -21,7 +22,7 @@ function NoteEditor() {
   const [noteId, setNoteId] = useState(urlNoteId || null)
   const [initialContent, setInitialContent] = useState("")
   const [noteTitle, setNoteTitle] = useState("")
-  const [currentUser, setCurrentUser] = useState(user)
+  const [folders, setFolders] = useState([])
   const [notes, setNotes] = useState([])
   const navigate = useNavigate()
 
@@ -119,24 +120,43 @@ function NoteEditor() {
     setNoteId(urlNoteId || null)
   }, [searchParams])
 
-  // Fetch notes for sidebar
+  // Fetch folders and notes for sidebar
   useEffect(() => {
-    fetchNotes()
-  }, [])
+    const fetchFolders = async () => {
+      try {
+        if (!userId) return;
+        const response = await axios.get('/api/folders/all', {
+          params: { userID: userId },
+        });
+        setFolders(response.data);
+      } catch (error) {
+        console.error('Error fetching folders:', error);
+      }
+    };
 
-  const fetchNotes = async () => {
-    try {
-      if (!userId) return;
-      const response = await axios.get('/api/notes/all', {
-        params: { userID: userId },
-      });
-      setNotes(response.data);
-    } catch (error) {
-      console.error('Error fetching notes:', error);
-    }
+    const fetchNotes = async () => {
+      try {
+        if (!userId) return;
+        const response = await axios.get('/api/notes/all', {
+          params: { userID: userId },
+        });
+        setNotes(response.data);
+      } catch (error) {
+        console.error('Error fetching notes:', error);
+      }
+    };
+
+    fetchFolders();
+    fetchNotes();
+  }, [userId]);
+
+  const handleFolderClick = (folderId) => {
+    // Navigate to home page with folder context
+    navigate(`/home?folder=${folderId}`);
   };
 
   const handleNoteClick = (clickedNoteId) => {
+    // Navigate to the clicked note
     navigate(`/app?noteId=${clickedNoteId}`);
   };
 
@@ -323,26 +343,14 @@ function NoteEditor() {
         {/* Sidebar - Similar to Notion */}
         <div className="sidebar">
           <div className="sidebar-content">
-            <h4> Quick Access </h4>
-            <div className="sidebar-section">
-              <div className="sidebar-notes">
-                {notes.slice(0, 10).map((note) => (
-                  <div
-                    key={note._id}
-                    className="sidebar-note-item"
-                    onClick={() => handleNoteClick(note._id)}
-                  >
-                    <span className="sidebar-note-icon">📄</span>
-                    <span className="sidebar-note-title" title={note.title}>
-                      {note.title.length > 20 ? note.title.substring(0, 20) + '...' : note.title}
-                    </span>
-                  </div>
-                ))}
-                {notes.length === 0 && (
-                  <div className="sidebar-empty">No documents yet</div>
-                )}
-              </div>
-            </div>
+            <FolderTree
+              folders={folders}
+              notes={notes}
+              currentFolderId={null}
+              currentNoteId={noteId}
+              onFolderClick={handleFolderClick}
+              onNoteClick={handleNoteClick}
+            />
           </div>
         </div>
         <div className="editor-wrapper">
@@ -356,5 +364,4 @@ function NoteEditor() {
 }
 
 export default NoteEditor
-
 
