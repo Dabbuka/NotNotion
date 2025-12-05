@@ -1,11 +1,11 @@
 .home-container {
   position: fixed;
-  top: 70px;
+  top: 56px;
   left: 0;
   right: 0;
   bottom: 0;
   display: flex;
-  height: calc(100vh - 70px);
+  height: calc(100vh - 56px);
   width: 100vw;
   background-color: #242424;
   color: rgba(255, 255, 255, 0.87);
@@ -357,11 +357,11 @@
   .home-container {
     flex-direction: column;
     position: fixed;
-    top: 70px;
+    top: 56px;
     left: 0;
     right: 0;
     bottom: 0;
-    height: calc(100vh - 70px);
+    height: calc(100vh - 56px);
   }
 
   .sidebar {

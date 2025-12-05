@@ -45,7 +45,7 @@
   display: flex;
   flex-direction: column;
   /* Extra top padding to account for navbar (70px) + toolbar height (~50px) */
-  padding-top: 120px;
+  padding-top: 106px;
   box-sizing: border-box;
 }
 
@@ -73,7 +73,7 @@
   /* Will connect with document */
   /* Stick toolbar to top below navbar - stays fixed when scrolling */
   position: fixed;
-  top: 70px;
+  top: 56px;
   left: 0;
   right: 0;
   z-index: 99;
@@ -108,7 +108,7 @@
 .custom-md-editor .editor-layout {
   display: flex;
   width: 100%;
-  min-height: calc(100vh - 115px);
+  min-height: calc(100vh - 101px);
   margin-top: 45px;
   position: relative;
 }
@@ -117,9 +117,9 @@
 .custom-md-editor .sidebar {
   position: fixed;
   left: 0;
-  top: 115px;
+  top: 101px;
   width: 280px;
-  height: calc(100vh - 115px);
+  height: calc(100vh - 101px);
   background-color: #646;
   border-right: 1px solid #333;
   display: flex;
@@ -210,7 +210,7 @@
   min-width: 900px;
   /* Matches toolbar width */
   width: 100%;
-  min-height: calc(100vh - 115px);
+  min-height: calc(100vh - 101px);
   background-color: #ffffff;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   padding: 90px 100px;
@@ -252,11 +252,21 @@
 .custom-md-editor .note-title-input {
   background-color: transparent;
   color: rgb(255, 255, 255);
-  border: 2px solid rgb(155, 155, 155);
+  border: 2px solid transparent;  /* Invisible border by default */
   padding: 5px 8px;
   border-radius: 4px;
   font-size: 18px;
   font-weight: bold;
+  outline: none;
+  transition: border-color 0.2s ease;  /* Smooth transition */
+}
+
+.custom-md-editor .note-title-input:hover {
+  border-color: rgb(155, 155, 155);  /* Border appears on hover */
+}
+
+.custom-md-editor .note-title-input:focus {
+  border-color: #1a73e8;  /* Blue border when focused/editing */
 }
 
 .custom-md-editor .save-button:hover {
@@ -461,7 +471,7 @@
 /* Responsive adjustments */
 @media (max-width: 1100px) {
   .custom-md-editor {
-    padding: 120px 20px 20px;
+    padding: 106px 20px 20px;
   }
 
   .custom-md-editor .w-md-editor {
