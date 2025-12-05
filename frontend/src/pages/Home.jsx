@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import './css/Home.css';
 
 const Home = () => {
+  // URL-based folder navigation
+  const [searchParams] = useSearchParams();
+  const currentFolderId = searchParams.get('folder'); // Get folder ID from URL
+  
   const [notes, setNotes] = useState([]);
   const [folders, setFolders] = useState([]);
   const [currentFolderContents, setCurrentFolderContents] = useState(null);
-  const [currentFolderId, setCurrentFolderId] = useState(null);
   const [filteredItems, setFilteredItems] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState('lastModified'); // 'name', 'date', 'lastModified'
+  const [sortBy, setSortBy] = useState('lastModified');
   const [newNoteTitle, setNewNoteTitle] = useState('');
   const [newFolderTitle, setNewFolderTitle] = useState('');
   const [showNewNoteForm, setShowNewNoteForm] = useState(false);
@@ -27,31 +30,28 @@ const Home = () => {
       fetchNotes(user);
       fetchFolders(user);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Fetch folder contents when currentFolderId changes
+  // Fetch folder contents when URL folder parameter changes
   useEffect(() => {
-    if (currentFolderId && currentUser) {
+    if (currentFolderId) {
       fetchFolderContents(currentFolderId);
     } else {
       setCurrentFolderContents(null);
     }
   }, [currentFolderId]);
 
-  // Filter and sort items (notes + folders) when search query, sortBy, or items change
+  // Filter and sort items when search query, sortBy, or items change
   useEffect(() => {
     let items = [];
 
     // If searching, search ALL items regardless of hierarchy
     if (searchQuery.trim()) {
-      // Search through all notes
       const allNotes = notes.map(n => ({ ...n, itemType: 'Note', isFolder: false }));
-      // Search through all folders
       const allFolders = folders.map(f => ({ ...f, itemType: 'Folder', isFolder: true }));
-      // Combine all items
       const allItems = [...allFolders, ...allNotes];
       
-      // Filter by search query
       items = allItems.filter(item => {
         const title = item.title || '';
         const content = item.content || '';
@@ -61,16 +61,15 @@ const Home = () => {
     } else {
       // Get items based on current folder context (no search)
       if (currentFolderId && currentFolderContents) {
-        // Show items from current folder
         items = currentFolderContents.items || [];
       } else {
-        // Show root level items (notes without folderID and folders without parentFolderID)
-        const rootNotes = notes.filter(note => {
-          return note.folderID === null || note.folderID === undefined;
-        });
-        const rootFolders = folders.filter(folder => {
-          return folder.parentFolderID === null || folder.parentFolderID === undefined;
-        });
+        // Show root level items
+        const rootNotes = notes.filter(note => 
+          note.folderID === null || note.folderID === undefined
+        );
+        const rootFolders = folders.filter(folder => 
+          folder.parentFolderID === null || folder.parentFolderID === undefined
+        );
         items = [
           ...rootFolders.map(f => ({ ...f, itemType: 'Folder', isFolder: true })),
           ...rootNotes.map(n => ({ ...n, itemType: 'Note', isFolder: false }))
@@ -101,8 +100,6 @@ const Home = () => {
 
     setFilteredItems(sorted);
   }, [searchQuery, sortBy, notes, folders, currentFolderId, currentFolderContents]);
-
-  
 
   const fetchNotes = async (userFromArg) => {
     try {
@@ -166,10 +163,8 @@ const Home = () => {
 
       const response = await axios.post('/api/notes/createNote', noteData);
       
-      // Always add to notes state for search functionality
       setNotes([response.data, ...notes]);
       
-      // If in a folder, add to folder contents and refresh folder
       if (currentFolderId) {
         await axios.post(`/api/folders/${currentFolderId}/addItem`, {
           itemId: response.data._id,
@@ -181,7 +176,6 @@ const Home = () => {
       setNewNoteTitle('');
       setShowNewNoteForm(false);
       
-      // Navigate to the note editor
       navigate(`/app?noteId=${response.data._id}`);
     } catch (error) {
       console.error('Error creating note:', error);
@@ -213,10 +207,8 @@ const Home = () => {
 
       const response = await axios.post('/api/folders/createFolder', folderData);
       
-      // Always add to folders state for search functionality
       setFolders([response.data, ...folders]);
       
-      // If in a folder, add to folder contents and refresh folder
       if (currentFolderId) {
         await axios.post(`/api/folders/${currentFolderId}/addItem`, {
           itemId: response.data._id,
@@ -233,72 +225,22 @@ const Home = () => {
     }
   };
 
+  // Navigate to note editor
   const handleNoteClick = (noteId) => {
     navigate(`/app?noteId=${noteId}`);
   };
 
+  // Navigate to folder via URL (enables browser back button!)
   const handleFolderClick = (folderId) => {
-    setCurrentFolderId(folderId);
+    navigate(`/home?folder=${folderId}`);
   };
 
+  // Navigate back to root
   const handleBackToRoot = () => {
-    setCurrentFolderId(null);
+    navigate('/home');
   };
 
-  const handleParentDirectory = () => {
-    if (!currentFolderId) return;
-    
-    const currentFolder = folders.find(f => f._id.toString() === currentFolderId.toString());
-    if (currentFolder && currentFolder.parentFolderID) {
-      setCurrentFolderId(currentFolder.parentFolderID.toString());
-    } else {
-      setCurrentFolderId(null);
-    }
-  };
-
-  const getCurrentFolder = () => {
-    if (!currentFolderId) return null;
-    return folders.find(f => f._id.toString() === currentFolderId.toString()) || null;
-  };
-
-  const getCurrentDirectoryItems = () => {
-    let items = [];
-    
-    if (currentFolderId && currentFolderContents) {
-      // Return items from current folder
-      items = currentFolderContents.items || [];
-    } else {
-      // Return root level items - strict filtering
-      const rootNotes = notes.filter(note => {
-        // Must be null or undefined, not empty string or other falsy values
-        return note.folderID === null || note.folderID === undefined;
-      });
-      const rootFolders = folders.filter(folder => {
-        // Must be null or undefined, not empty string or other falsy values
-        return folder.parentFolderID === null || folder.parentFolderID === undefined;
-      });
-      items = [
-        ...rootFolders.map(f => ({ ...f, itemType: 'Folder', isFolder: true })),
-        ...rootNotes.map(n => ({ ...n, itemType: 'Note', isFolder: false }))
-      ];
-    }
-
-    // Sort items: folders first, then by name
-    return items.sort((a, b) => {
-      const aIsFolder = a.itemType === 'Folder' || a.isFolder;
-      const bIsFolder = b.itemType === 'Folder' || b.isFolder;
-      
-      // Folders come first
-      if (aIsFolder && !bIsFolder) return -1;
-      if (!aIsFolder && bIsFolder) return 1;
-      
-      // Then sort by name
-      const aTitle = a.item?.title || a.title || '';
-      const bTitle = b.item?.title || b.title || '';
-      return aTitle.localeCompare(bTitle);
-    });
-  };
-
+  // Build breadcrumb trail from current folder to root
   const getBreadcrumbs = () => {
     if (!currentFolderId) return [];
     
@@ -327,22 +269,26 @@ const Home = () => {
     if (diffDays === 2) return 'Yesterday';
     if (diffDays <= 7) return `${diffDays - 1} days ago`;
     
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined });
+    return date.toLocaleDateString('en-US', { 
+      month: 'short', 
+      day: 'numeric', 
+      year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined 
+    });
   };
 
   return (
     <div className="home-container">
-      {/* Sidebar - Similar to Notion */}
+      {/* Sidebar */}
       <div className="sidebar">
         <div className="sidebar-header">
-        {currentUser && (
+          {currentUser && (
             <div className="user-greeting">
               <h3><span><strong>{currentUser.username}</strong>'s Space</span></h3>
             </div>
           )}
         </div>
         <div className="sidebar-content">
-          <h4> Quick Access </h4>
+          <h4>Quick Access</h4>
           <div className="sidebar-section">
             <div className="sidebar-notes">
               {notes.slice(0, 10).map((note) => (
@@ -367,7 +313,7 @@ const Home = () => {
 
       {/* Main Content Area */}
       <div className="main-content">
-        {/* Header with Search, Sort and User */}
+        {/* Header with Search and Sort */}
         <div className="home-header">
           <div className="search-container">
             <input
@@ -392,8 +338,6 @@ const Home = () => {
               <option value="date">Date Created</option>
             </select>
           </div>
-
-          
         </div>
 
         {/* Breadcrumb Navigation */}
@@ -402,11 +346,11 @@ const Home = () => {
             <button onClick={handleBackToRoot} className="breadcrumb-home">
               Home
             </button>
-            {getBreadcrumbs().map((crumb, index) => (
+            {getBreadcrumbs().map((crumb) => (
               <React.Fragment key={crumb.id}>
                 <span className="breadcrumb-separator"> / </span>
                 <button
-                  onClick={() => setCurrentFolderId(crumb.id)}
+                  onClick={() => navigate(`/home?folder=${crumb.id}`)}
                   className="breadcrumb-item"
                 >
                   {crumb.title}
@@ -490,7 +434,7 @@ const Home = () => {
           )}
         </div>
 
-        {/* Documents Grid - Similar to GoodNotes */}
+        {/* Documents Grid */}
         <div className="documents-grid">
           {filteredItems.length === 0 ? (
             <div className="empty-state">
@@ -550,4 +494,3 @@ const Home = () => {
 };
 
 export default Home;
-

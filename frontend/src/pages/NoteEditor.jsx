@@ -22,8 +22,6 @@ function NoteEditor() {
   const [noteId, setNoteId] = useState(urlNoteId || null)
   const [initialContent, setInitialContent] = useState("")
   const [noteTitle, setNoteTitle] = useState("")
-  const [currentUser, setCurrentUser] = useState(user)
-  const [notes, setNotes] = useState([])
   const [folders, setFolders] = useState([])
   const navigate = useNavigate()
 
@@ -121,43 +119,25 @@ function NoteEditor() {
     setNoteId(urlNoteId || null)
   }, [searchParams])
 
-  // Fetch notes and folders for sidebar
+  // Fetch folders for sidebar
   useEffect(() => {
-    fetchNotes()
-    fetchFolders()
-  }, [])
-
-  const fetchNotes = async () => {
-    try {
-      if (!userId) return;
-      const response = await axios.get('/api/notes/all', {
-        params: { userID: userId },
-      });
-      setNotes(response.data);
-    } catch (error) {
-      console.error('Error fetching notes:', error);
-    }
-  };
-
-  const fetchFolders = async () => {
-    try {
-      if (!userId) return;
-      const response = await axios.get('/api/folders/all', {
-        params: { userID: userId },
-      });
-      setFolders(response.data);
-    } catch (error) {
-      console.error('Error fetching folders:', error);
-    }
-  };
-
-  const handleNoteClick = (clickedNoteId) => {
-    navigate(`/app?noteId=${clickedNoteId}`);
-  };
+    const fetchFolders = async () => {
+      try {
+        if (!userId) return;
+        const response = await axios.get('/api/folders/all', {
+          params: { userID: userId },
+        });
+        setFolders(response.data);
+      } catch (error) {
+        console.error('Error fetching folders:', error);
+      }
+    };
+    fetchFolders();
+  }, [userId]);
 
   const handleFolderClick = (folderId) => {
     // Navigate to home page with folder context
-    navigate(`/home?folderId=${folderId}`);
+    navigate(`/home?folder=${folderId}`);
   };
 
   useEffect(() => {
@@ -361,5 +341,4 @@ function NoteEditor() {
 }
 
 export default NoteEditor
-
 
