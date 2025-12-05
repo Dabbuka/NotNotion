@@ -30,18 +30,21 @@ function Navbar() {
       </div>
       
       <div className="navbar-links">
-        <Link 
-          to="/home" 
-          className={`navbar-link ${location.pathname === '/home' ? 'active' : ''}`}
-        >
-          Home
-        </Link>
 
         {currentUser ? 
         (
+            <>
+            <Link 
+            to="/home" 
+            className={`navbar-link ${location.pathname === '/home' ? 'active' : ''}`}
+            >
+            Home
+            </Link>
             <button onClick={handleLogout} className="navbar-link navbar-link-logout">
               Logout
             </button>
+            </>
+            
         ) : ( //change the conditional if you want to show the login and register buttons while signed in
           <>
             <Link 
