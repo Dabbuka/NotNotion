@@ -108,6 +108,51 @@
   position: relative;
 }
 
+/* Sidebar Toggle Button (Hamburger) */
+.custom-md-editor .sidebar-toggle {
+  position: fixed;
+  left: 232px; /* Inside sidebar, near right edge */
+  top: 104px;
+  width: 40px;
+  height: 40px;
+  background: #646;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, left 0.3s ease, transform 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.custom-md-editor .sidebar-toggle:hover {
+  background: #858;
+  transform: scale(1.05);
+}
+
+/* Move toggle button to left edge when sidebar is closed */
+.custom-md-editor .sidebar-closed .sidebar-toggle {
+  left: 12px;
+}
+
+.hamburger-icon {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 20px;
+}
+
+.hamburger-icon span {
+  display: block;
+  height: 3px;
+  width: 100%;
+  background: #fff;
+  border-radius: 2px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
 /* Sidebar styles - fixed on the left */
 /* Navbar: 56px + Toolbar: 40px = 96px */
 .custom-md-editor .sidebar {
@@ -124,6 +169,12 @@
   overflow-y: auto;
   overflow-x: hidden;
   z-index: 1;
+  transition: transform 0.3s ease;
+}
+
+/* Sidebar closed state - slides off screen */
+.custom-md-editor .sidebar-closed .sidebar {
+  transform: translateX(-100%);
 }
 
 .custom-md-editor .sidebar-header {
@@ -193,20 +244,29 @@
 
 /* Editor wrapper - centers the editor */
 .custom-md-editor .editor-wrapper {
-  flex: 1;
+  position: fixed;
+  left: 280px; /* Start after sidebar */
+  right: 0;
+  top: 96px;
+  bottom: 0;
   display: flex;
   justify-content: center;
-  width: 100%;
-  margin-left: 280px; /* Account for sidebar width */
+  align-items: flex-start;
   padding: 0 40px;
   box-sizing: border-box;
+  overflow-y: auto;
+  transition: left 0.3s ease;
+}
+
+/* Editor wrapper when sidebar is closed - full width centered */
+.custom-md-editor .sidebar-closed .editor-wrapper {
+  left: 0;
 }
 
 /* Document container - same width as toolbar */
 .custom-md-editor .w-md-editor {
   min-width: 900px;
-  /* Matches toolbar width */
-  width: 100%;
+  max-width: 900px;
   min-height: calc(100vh - 96px);
   background-color: #ffffff;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
@@ -217,10 +277,8 @@
   border-radius: 0 0 8px 8px;
   border-top: none;
   box-sizing: border-box;
-  justify-content: center;
-  margin-left: 260px;
   overflow-y: auto;
-  /* Center the document */
+  /* No margin - centering handled by editor-wrapper */
 }
 
 .w-md-editor-toolbar .button-border {

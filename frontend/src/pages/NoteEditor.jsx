@@ -24,6 +24,7 @@ function NoteEditor() {
   const [noteTitle, setNoteTitle] = useState("")
   const [folders, setFolders] = useState([])
   const [notes, setNotes] = useState([])
+  const [sidebarOpen, setSidebarOpen] = useState(true)
   const navigate = useNavigate()
 
   const editor = useEditor({
@@ -339,7 +340,20 @@ function NoteEditor() {
           <p className="button-border"> | </p>
         </div>
         </div>
-      <div className="editor-layout">
+      <div className={`editor-layout ${sidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
+        {/* Sidebar Toggle Button */}
+        <button 
+          className="sidebar-toggle"
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          title={sidebarOpen ? "Hide sidebar" : "Show sidebar"}
+        >
+          <span className="hamburger-icon">
+            <span></span>
+            <span></span>
+            <span></span>
+          </span>
+        </button>
+        
         {/* Sidebar - Similar to Notion */}
         <div className="sidebar">
           <div className="sidebar-content">
