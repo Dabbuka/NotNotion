@@ -5,57 +5,109 @@ import './css/Home.css';
 
 const Home = () => {
   const [notes, setNotes] = useState([]);
-  const [filteredNotes, setFilteredNotes] = useState([]);
+  const [folders, setFolders] = useState([]);
+  const [currentFolderContents, setCurrentFolderContents] = useState(null);
+  const [currentFolderId, setCurrentFolderId] = useState(null);
+  const [filteredItems, setFilteredItems] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('lastModified'); // 'name', 'date', 'lastModified'
   const [newNoteTitle, setNewNoteTitle] = useState('');
+  const [newFolderTitle, setNewFolderTitle] = useState('');
   const [showNewNoteForm, setShowNewNoteForm] = useState(false);
+  const [showNewFolderForm, setShowNewFolderForm] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const navigate = useNavigate();
 
-  // Load current user and fetch notes on component mount
+  // Load current user and fetch notes/folders on component mount
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     const user = storedUser ? JSON.parse(storedUser) : null;
     setCurrentUser(user);
-    fetchNotes(user);
+    if (user) {
+      fetchNotes(user);
+      fetchFolders(user);
+    }
   }, []);
 
-  // Filter and sort notes when search query, sortBy, or notes change
+  // Fetch folder contents when currentFolderId changes
   useEffect(() => {
-    let filtered = notes;
+    if (currentFolderId && currentUser) {
+      fetchFolderContents(currentFolderId);
+    } else {
+      setCurrentFolderContents(null);
+    }
+  }, [currentFolderId]);
 
-    // Filter by search query
+  // Filter and sort items (notes + folders) when search query, sortBy, or items change
+  useEffect(() => {
+    let items = [];
+
+    // If searching, search ALL items regardless of hierarchy
     if (searchQuery.trim()) {
-      filtered = notes.filter(note =>
-        note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (note.content && note.content.toLowerCase().includes(searchQuery.toLowerCase()))
-      );
+      // Search through all notes
+      const allNotes = notes.map(n => ({ ...n, itemType: 'Note', isFolder: false }));
+      // Search through all folders
+      const allFolders = folders.map(f => ({ ...f, itemType: 'Folder', isFolder: true }));
+      // Combine all items
+      const allItems = [...allFolders, ...allNotes];
+      
+      // Filter by search query
+      items = allItems.filter(item => {
+        const title = item.title || '';
+        const content = item.content || '';
+        return title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+               content.toLowerCase().includes(searchQuery.toLowerCase());
+      });
+    } else {
+      // Get items based on current folder context (no search)
+      if (currentFolderId && currentFolderContents) {
+        // Show items from current folder
+        items = currentFolderContents.items || [];
+      } else {
+        // Show root level items (notes without folderID and folders without parentFolderID)
+        const rootNotes = notes.filter(note => {
+          return note.folderID === null || note.folderID === undefined;
+        });
+        const rootFolders = folders.filter(folder => {
+          return folder.parentFolderID === null || folder.parentFolderID === undefined;
+        });
+        items = [
+          ...rootFolders.map(f => ({ ...f, itemType: 'Folder', isFolder: true })),
+          ...rootNotes.map(n => ({ ...n, itemType: 'Note', isFolder: false }))
+        ];
+      }
     }
 
-    // Sort notes
-    const sorted = [...filtered].sort((a, b) => {
+    // Sort items
+    const sorted = [...items].sort((a, b) => {
+      const aTitle = a.item?.title || a.title || '';
+      const bTitle = b.item?.title || b.title || '';
+      const aDate = a.item?.updatedAt || a.updatedAt || new Date();
+      const bDate = b.item?.updatedAt || b.updatedAt || new Date();
+      const aCreated = a.item?.createdAt || a.createdAt || new Date();
+      const bCreated = b.item?.createdAt || b.createdAt || new Date();
+
       switch (sortBy) {
         case 'name':
-          return a.title.localeCompare(b.title);
+          return aTitle.localeCompare(bTitle);
         case 'date':
-          return new Date(b.createdAt) - new Date(a.createdAt);
+          return new Date(bCreated) - new Date(aCreated);
         case 'lastModified':
-          return new Date(b.updatedAt) - new Date(a.updatedAt);
+          return new Date(bDate) - new Date(aDate);
         default:
           return 0;
       }
     });
 
-    setFilteredNotes(sorted);
-  }, [searchQuery, sortBy, notes]);
+    setFilteredItems(sorted);
+  }, [searchQuery, sortBy, notes, folders, currentFolderId, currentFolderContents]);
 
   
 
   const fetchNotes = async (userFromArg) => {
     try {
       const user = userFromArg || currentUser;
-      if (!user?._id) return; // or redirect to login
+      if (!user?._id) return;
   
       const response = await axios.get('/api/notes/all', {
         params: { userID: user._id },
@@ -63,6 +115,29 @@ const Home = () => {
       setNotes(response.data);
     } catch (error) {
       console.error('Error fetching notes:', error);
+    }
+  };
+
+  const fetchFolders = async (userFromArg) => {
+    try {
+      const user = userFromArg || currentUser;
+      if (!user?._id) return;
+
+      const response = await axios.get('/api/folders/all', {
+        params: { userID: user._id },
+      });
+      setFolders(response.data);
+    } catch (error) {
+      console.error('Error fetching folders:', error);
+    }
+  };
+
+  const fetchFolderContents = async (folderId) => {
+    try {
+      const response = await axios.get(`/api/folders/${folderId}/contents`);
+      setCurrentFolderContents(response.data);
+    } catch (error) {
+      console.error('Error fetching folder contents:', error);
     }
   };
 
@@ -79,15 +154,30 @@ const Home = () => {
         return;
       }
 
-
-      const response = await axios.post('/api/notes/createNote', {
+      const noteData = {
         title: newNoteTitle,
         content: '',
         userID: user._id,
-      });
+      };
+
+      if (currentFolderId) {
+        noteData.folderID = currentFolderId;
+      }
+
+      const response = await axios.post('/api/notes/createNote', noteData);
       
-      // Add the new note to the list
+      // Always add to notes state for search functionality
       setNotes([response.data, ...notes]);
+      
+      // If in a folder, add to folder contents and refresh folder
+      if (currentFolderId) {
+        await axios.post(`/api/folders/${currentFolderId}/addItem`, {
+          itemId: response.data._id,
+          itemType: 'Note'
+        });
+        fetchFolderContents(currentFolderId);
+      }
+      
       setNewNoteTitle('');
       setShowNewNoteForm(false);
       
@@ -99,8 +189,131 @@ const Home = () => {
     }
   };
 
+  const handleCreateFolder = async (e) => {
+    e.preventDefault();
+    if (!newFolderTitle.trim()) return;
+
+    try {
+      const storedUser = localStorage.getItem('user');
+      const user = storedUser ? JSON.parse(storedUser) : null;
+
+      if (!user?._id) {
+        alert("You must be logged in to create a folder.");
+        return;
+      }
+
+      const folderData = {
+        title: newFolderTitle,
+        userID: user._id,
+      };
+
+      if (currentFolderId) {
+        folderData.parentFolderID = currentFolderId;
+      }
+
+      const response = await axios.post('/api/folders/createFolder', folderData);
+      
+      // Always add to folders state for search functionality
+      setFolders([response.data, ...folders]);
+      
+      // If in a folder, add to folder contents and refresh folder
+      if (currentFolderId) {
+        await axios.post(`/api/folders/${currentFolderId}/addItem`, {
+          itemId: response.data._id,
+          itemType: 'Folder'
+        });
+        fetchFolderContents(currentFolderId);
+      }
+      
+      setNewFolderTitle('');
+      setShowNewFolderForm(false);
+    } catch (error) {
+      console.error('Error creating folder:', error);
+      alert('Failed to create folder. Please try again.');
+    }
+  };
+
   const handleNoteClick = (noteId) => {
     navigate(`/app?noteId=${noteId}`);
+  };
+
+  const handleFolderClick = (folderId) => {
+    setCurrentFolderId(folderId);
+  };
+
+  const handleBackToRoot = () => {
+    setCurrentFolderId(null);
+  };
+
+  const handleParentDirectory = () => {
+    if (!currentFolderId) return;
+    
+    const currentFolder = folders.find(f => f._id.toString() === currentFolderId.toString());
+    if (currentFolder && currentFolder.parentFolderID) {
+      setCurrentFolderId(currentFolder.parentFolderID.toString());
+    } else {
+      setCurrentFolderId(null);
+    }
+  };
+
+  const getCurrentFolder = () => {
+    if (!currentFolderId) return null;
+    return folders.find(f => f._id.toString() === currentFolderId.toString()) || null;
+  };
+
+  const getCurrentDirectoryItems = () => {
+    let items = [];
+    
+    if (currentFolderId && currentFolderContents) {
+      // Return items from current folder
+      items = currentFolderContents.items || [];
+    } else {
+      // Return root level items - strict filtering
+      const rootNotes = notes.filter(note => {
+        // Must be null or undefined, not empty string or other falsy values
+        return note.folderID === null || note.folderID === undefined;
+      });
+      const rootFolders = folders.filter(folder => {
+        // Must be null or undefined, not empty string or other falsy values
+        return folder.parentFolderID === null || folder.parentFolderID === undefined;
+      });
+      items = [
+        ...rootFolders.map(f => ({ ...f, itemType: 'Folder', isFolder: true })),
+        ...rootNotes.map(n => ({ ...n, itemType: 'Note', isFolder: false }))
+      ];
+    }
+
+    // Sort items: folders first, then by name
+    return items.sort((a, b) => {
+      const aIsFolder = a.itemType === 'Folder' || a.isFolder;
+      const bIsFolder = b.itemType === 'Folder' || b.isFolder;
+      
+      // Folders come first
+      if (aIsFolder && !bIsFolder) return -1;
+      if (!aIsFolder && bIsFolder) return 1;
+      
+      // Then sort by name
+      const aTitle = a.item?.title || a.title || '';
+      const bTitle = b.item?.title || b.title || '';
+      return aTitle.localeCompare(bTitle);
+    });
+  };
+
+  const getBreadcrumbs = () => {
+    if (!currentFolderId) return [];
+    
+    const breadcrumbs = [];
+    let currentId = currentFolderId.toString();
+    const folderMap = new Map(folders.map(f => [f._id.toString(), f]));
+    
+    while (currentId) {
+      const folder = folderMap.get(currentId);
+      if (!folder) break;
+      breadcrumbs.unshift({ id: folder._id, title: folder.title });
+      currentId = folder.parentFolderID ? folder.parentFolderID.toString() : null;
+    }
+    
+    return breadcrumbs;
   };
 
   const formatDate = (dateString) => {
@@ -164,7 +377,6 @@ const Home = () => {
               onChange={(e) => setSearchQuery(e.target.value)}
               className="search-input"
             />
-            <span className="search-icon">🔍</span>
           </div>
           
           <div className="sort-container">
@@ -184,16 +396,48 @@ const Home = () => {
           
         </div>
 
-        {/* Add New Document Section */}
-        <div className="new-document-section">
-          {!showNewNoteForm ? (
-            <button
-              className="add-document-button"
-              onClick={() => setShowNewNoteForm(true)}
-            >
-              + New Document
+        {/* Breadcrumb Navigation */}
+        {currentFolderId && (
+          <div className="breadcrumb-nav">
+            <button onClick={handleBackToRoot} className="breadcrumb-home">
+              Home
             </button>
-          ) : (
+            {getBreadcrumbs().map((crumb, index) => (
+              <React.Fragment key={crumb.id}>
+                <span className="breadcrumb-separator"> / </span>
+                <button
+                  onClick={() => setCurrentFolderId(crumb.id)}
+                  className="breadcrumb-item"
+                >
+                  {crumb.title}
+                </button>
+              </React.Fragment>
+            ))}
+          </div>
+        )}
+
+        {/* Add New Document/Folder Section */}
+        <div className="new-document-section">
+          <div className="new-item-buttons">
+            {!showNewNoteForm && !showNewFolderForm && (
+              <>
+                <button
+                  className="add-document-button"
+                  onClick={() => setShowNewNoteForm(true)}
+                >
+                  + New Document
+                </button>
+                <button
+                  className="add-folder-button"
+                  onClick={() => setShowNewFolderForm(true)}
+                >
+                  + New Folder
+                </button>
+              </>
+            )}
+          </div>
+          
+          {showNewNoteForm && (
             <form onSubmit={handleCreateNote} className="new-note-form">
               <input
                 type="text"
@@ -218,39 +462,86 @@ const Home = () => {
               </div>
             </form>
           )}
+
+          {showNewFolderForm && (
+            <form onSubmit={handleCreateFolder} className="new-note-form">
+              <input
+                type="text"
+                placeholder="Enter folder name..."
+                value={newFolderTitle}
+                onChange={(e) => setNewFolderTitle(e.target.value)}
+                className="new-note-input"
+                autoFocus
+              />
+              <div className="new-note-actions">
+                <button type="submit" className="create-button">Create</button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowNewFolderForm(false);
+                    setNewFolderTitle('');
+                  }}
+                  className="cancel-button"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          )}
         </div>
 
         {/* Documents Grid - Similar to GoodNotes */}
         <div className="documents-grid">
-          {filteredNotes.length === 0 ? (
+          {filteredItems.length === 0 ? (
             <div className="empty-state">
               {searchQuery ? (
-                <p>No documents found matching "{searchQuery}"</p>
+                <p>No items found matching "{searchQuery}"</p>
               ) : (
                 <div>
-                  <p className="empty-state-title">No documents yet</p>
-                  <p className="empty-state-subtitle">Create your first document to get started</p>
+                  <p className="empty-state-title">
+                    {currentFolderId ? 'This folder is empty' : 'No items yet'}
+                  </p>
+                  <p className="empty-state-subtitle">
+                    {currentFolderId 
+                      ? 'Add documents or folders to get started' 
+                      : 'Create your first document or folder to get started'}
+                  </p>
                 </div>
               )}
             </div>
           ) : (
-            filteredNotes.map((note) => (
-              <div key={note._id} className="document-wrapper">
-                <div
-                  className="document-card"
-                  onClick={() => handleNoteClick(note._id)}
-                >
+            filteredItems.map((item) => {
+              const isFolder = item.itemType === 'Folder' || item.isFolder;
+              const itemData = item.item || item;
+              const itemId = itemData._id;
+              const itemTitle = itemData.title;
+              const itemDate = itemData.updatedAt;
+
+              return (
+                <div key={itemId} className="document-wrapper">
+                  <div
+                    className={`document-card ${isFolder ? 'folder-card' : ''}`}
+                    onClick={() => {
+                      if (isFolder) {
+                        handleFolderClick(itemId);
+                      } else {
+                        handleNoteClick(itemId);
+                      }
+                    }}
+                  >
+                    {isFolder && <span className="folder-card-icon">📁</span>}
+                  </div>
+                  <div className="document-info">
+                    <h3 className="document-title" title={itemTitle}>
+                      {itemTitle}
+                    </h3>
+                    <p className="document-meta">
+                      {formatDate(itemDate)}
+                    </p>
+                  </div>
                 </div>
-                <div className="document-info">
-                  <h3 className="document-title" title={note.title}>
-                    {note.title}
-                  </h3>
-                  <p className="document-meta">
-                    {formatDate(note.updatedAt)}
-                  </p>
-                </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       </div>

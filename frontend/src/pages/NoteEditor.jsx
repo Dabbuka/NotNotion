@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import axios from 'axios'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useEditor, EditorContent } from '@tiptap/react'
@@ -6,6 +6,7 @@ import StarterKit from '@tiptap/starter-kit'
 import Link from '@tiptap/extension-link'
 import Image from '@tiptap/extension-image'
 import Dropcursor from '@tiptap/extension-dropcursor'
+import FolderTree from './FolderTree'
 import './css/NoteEditor.css'
 
 const SAVE_MODE = 'backend'
@@ -23,6 +24,7 @@ function NoteEditor() {
   const [noteTitle, setNoteTitle] = useState("")
   const [currentUser, setCurrentUser] = useState(user)
   const [notes, setNotes] = useState([])
+  const [folders, setFolders] = useState([])
   const navigate = useNavigate()
 
   const editor = useEditor({
@@ -119,9 +121,10 @@ function NoteEditor() {
     setNoteId(urlNoteId || null)
   }, [searchParams])
 
-  // Fetch notes for sidebar
+  // Fetch notes and folders for sidebar
   useEffect(() => {
     fetchNotes()
+    fetchFolders()
   }, [])
 
   const fetchNotes = async () => {
@@ -136,8 +139,25 @@ function NoteEditor() {
     }
   };
 
+  const fetchFolders = async () => {
+    try {
+      if (!userId) return;
+      const response = await axios.get('/api/folders/all', {
+        params: { userID: userId },
+      });
+      setFolders(response.data);
+    } catch (error) {
+      console.error('Error fetching folders:', error);
+    }
+  };
+
   const handleNoteClick = (clickedNoteId) => {
     navigate(`/app?noteId=${clickedNoteId}`);
+  };
+
+  const handleFolderClick = (folderId) => {
+    // Navigate to home page with folder context
+    navigate(`/home?folderId=${folderId}`);
   };
 
   useEffect(() => {
@@ -323,26 +343,11 @@ function NoteEditor() {
         {/* Sidebar - Similar to Notion */}
         <div className="sidebar">
           <div className="sidebar-content">
-            <h4> Quick Access </h4>
-            <div className="sidebar-section">
-              <div className="sidebar-notes">
-                {notes.slice(0, 10).map((note) => (
-                  <div
-                    key={note._id}
-                    className="sidebar-note-item"
-                    onClick={() => handleNoteClick(note._id)}
-                  >
-                    <span className="sidebar-note-icon">📄</span>
-                    <span className="sidebar-note-title" title={note.title}>
-                      {note.title.length > 20 ? note.title.substring(0, 20) + '...' : note.title}
-                    </span>
-                  </div>
-                ))}
-                {notes.length === 0 && (
-                  <div className="sidebar-empty">No documents yet</div>
-                )}
-              </div>
-            </div>
+            <FolderTree
+              folders={folders}
+              currentFolderId={null}
+              onFolderClick={handleFolderClick}
+            />
           </div>
         </div>
         <div className="editor-wrapper">
