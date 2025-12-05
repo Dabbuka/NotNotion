@@ -3,8 +3,6 @@ This is the backend for the NotNotion note-taking application. It is built using
 
 ## Folder Structure
 
-## Folder Structure
-
 - **backend/**
   - **src/**
     - **controllers/** – Functions that handle incoming requests and responses
@@ -18,26 +16,41 @@ This is the backend for the NotNotion note-taking application. It is built using
 
 ## Starting the Server
 Navigate to the backend directory and run:
-    npm install
+```bash
+npm install
+```
 This is so all dependencies are added to your local machine.
 
 To start the backend:
-    npm start
+```bash
+npm start
+```
 
 You should see a message like:
-Server running on port 5000\
+```
+Server running on port 3000
 Connected to MongoDB
-
+```
 
 This means the backend is ready to accept requests from the frontend.
 
 ## API Routes
 
-| Route               | Method | Description                        |
-|-------------------- |------- |-----------------------------------|
-| /api/notes          | GET    | Get all notes                      |
-| /api/notes          | POST   | Create a new note                  |
-| /api/notes/:id      | PUT    | Update a note by ID -- TODO        |
-| /api/notes/:id      | DELETE | Delete a note by ID -- TODO        |
-| /api/users/register | POST   | Register a new user -- TODO        |
-| /api/users/login    | POST   | Log in a user (returns JWT) -- TODO |
+| Route                              | Method | Description                                    |
+|-----------------------------------|--------|------------------------------------------------|
+| **Notes**                         |        |                                                |
+| /api/notes/createNote             | POST   | Create a new note                              |
+| /api/notes/all                    | GET    | Get all notes for a user (requires userID query param) |
+| /api/notes/:id                    | GET    | Get a single note by ID                        |
+| /api/notes/:id                    | PATCH  | Update a note by ID                            |
+| /api/notes/user/:userId           | GET    | Get the most recent note for a user            |
+| /api/notes/user/:userId/:title    | GET    | Get a note by user ID and title                |
+| **Users**                         |        |                                                |
+| /api/users/register               | POST   | Register a new user                            |
+| /api/users/login                  | POST   | Log in a user (returns JWT token)             |
+| /api/users/me                     | GET    | Retrieve current user information              |
+| **Folders**                       |        |                                                |
+| /api/folders/createFolder         | POST   | Create a new folder                            |
+| /api/folders/:id                  | GET    | Get a folder by ID                             |
+| /api/folders/renameFolder         | PATCH  | Rename a folder                                |
+| /api/folders/addFolder            | POST   | Add a folder                                   |
