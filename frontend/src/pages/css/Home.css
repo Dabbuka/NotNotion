@@ -253,23 +253,42 @@
 .documents-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 20px;
+  gap: 0;
   margin-top: 20px;
 }
 
 .document-card {
-  background-color: #1a1a1a;
-  border: 1px solid #333;
-  border-radius: 8px;
-  padding: 20px;
-  cursor: pointer;
-  transition: all 0.2s;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  min-height: 150px;
+  position: relative;
+  width: 120px;
+  height: 150px;
+  background: #f8f8f8;
+  border-radius: 6px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  overflow: hidden;
 }
 
+/* folded corner */
+.document-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  border-style: solid;
+  border-width: 0 30px 30px 0;     /* size of fold */
+  border-color: transparent #242424 transparent transparent;
+}
+
+/* inner lighter triangle to mimic paper fold */
+.document-card::after {
+  content: "";
+  position: absolute;
+  top: 0px;
+  right: 0;
+  border-style: solid;
+  border-width: 0 30px 30px 0;
+  box-shadow: -2px 2px 4px rgba(0,0,0,0.25); /* shadow for the fold */
+  border-color: transparent transparent #f8f8f8 transparent;
+}
 .document-card:hover {
   border-color: #646;
   transform: translateY(-2px);
@@ -291,7 +310,6 @@
 .document-title {
   margin: 0;
   font-size: 1.1rem;
-  font-weight: 600;
   color: rgba(255, 255, 255, 0.87);
   overflow: hidden;
   text-overflow: ellipsis;

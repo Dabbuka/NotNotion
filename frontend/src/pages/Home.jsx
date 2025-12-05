@@ -122,9 +122,14 @@ const Home = () => {
       {/* Sidebar - Similar to Notion */}
       <div className="sidebar">
         <div className="sidebar-header">
-          <h3>Quick Access</h3>
+        {currentUser && (
+            <div className="user-greeting">
+              <h3><span><strong>{currentUser.username}</strong>'s Space</span></h3>
+            </div>
+          )}
         </div>
         <div className="sidebar-content">
+          <h4> Quick Access </h4>
           <div className="sidebar-section">
             <div className="sidebar-notes">
               {notes.slice(0, 10).map((note) => (
@@ -176,11 +181,7 @@ const Home = () => {
             </select>
           </div>
 
-          {currentUser && (
-            <div className="user-greeting">
-              <span>Welcome, <strong>{currentUser.username}</strong></span>
-            </div>
-          )}
+          
         </div>
 
         {/* Add New Document Section */}
@@ -234,12 +235,12 @@ const Home = () => {
             </div>
           ) : (
             filteredNotes.map((note) => (
-              <div
-                key={note._id}
-                className="document-card"
-                onClick={() => handleNoteClick(note._id)}
-              >
-                <div className="document-icon">📄</div>
+              <div key={note._id} className="document-wrapper">
+                <div
+                  className="document-card"
+                  onClick={() => handleNoteClick(note._id)}
+                >
+                </div>
                 <div className="document-info">
                   <h3 className="document-title" title={note.title}>
                     {note.title}
