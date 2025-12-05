@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Note from "../models/note.js";
 
 // POST
@@ -56,6 +57,44 @@ export const getNotes = async (req, res) => {
     res.status(500).send("Server error");
   }
 };
+
+// GET (note by userID and optionally title; defaults to most recent if only userID provided)
+export const getUserNotes = async (req, res) => {
+  try {
+    const { userId, title } = req.params;
+
+    if (!userId) {
+      return res.status(400).json({ error: "userId is required" });
+    }
+
+    let query = { userID: new mongoose.Types.ObjectId(userId) };
+    
+    // If title is provided, search by both userID and title
+    if (title) {
+      query.title = title;
+      const note = await Note.findOne(query);
+      
+      if (!note) {
+        return res.status(404).json({ error: "Note not found" });
+      }
+      
+      return res.json(note);
+    }
+    
+    // If only userID is provided, return the most recent note
+    const note = await Note.findOne(query).sort({ updatedAt: -1 });
+
+    if (!note) {
+      return res.status(404).json({ error: "No notes found for this user" });
+    }
+
+    return res.json(note);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server error");
+  }
+};
+
 
 // PATCH (update note by id)
 export const updateNote = async (req, res) => {

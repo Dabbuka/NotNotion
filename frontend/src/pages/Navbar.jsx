@@ -10,7 +10,7 @@ function Navbar() {
     const storedUser = localStorage.getItem('user');
     const user = storedUser ? JSON.parse(storedUser) : null;
     setCurrentUser(user);
-  }, []);
+  }, [location.pathname]);
 
   return (
     <nav className="navbar">

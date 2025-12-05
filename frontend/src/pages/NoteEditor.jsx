@@ -7,10 +7,14 @@ import Image from '@tiptap/extension-image'
 import Dropcursor from '@tiptap/extension-dropcursor'
 import './css/NoteEditor.css'
 
-const SAVE_MODE = 'local'
+const SAVE_MODE = 'backend'
 
 function NoteEditor() {
-  const noteId = "6917d095d3794db386c18f88"
+  const storedUser = localStorage.getItem('user');
+  const user = storedUser ? JSON.parse(storedUser) : null;
+  const userId = user?._id;
+
+  const [noteId, setNoteId] = useState(null)
   const [initialContent, setInitialContent] = useState("")
   const [noteTitle, setNoteTitle] = useState("")
 
@@ -103,23 +107,37 @@ function NoteEditor() {
   })
 
   useEffect(() => {
+    if (!userId) {
+      console.error('User not logged in');
+      return;
+    }
+    if (!editor) {
+      return;
+    }
     async function loadNote() {
       try {
         let content = ''
         let title = ''
-        const contentKey = `note-${noteId}`
-        const titleKey = `note-title-${noteId}`
+        let loadedNoteId = null
 
         if (SAVE_MODE === 'backend') {
-          const res = await axios.get(`/api/notes/${noteId}`)
+          const res = await axios.get(`/api/notes/user/${userId}`)
           content = res.data.content || ''
           title = res.data.title || ''
+          loadedNoteId = res.data._id || null
+          setNoteId(loadedNoteId)
         } else {
           // Load from localStorage instead
-          const savedContent = localStorage.getItem(contentKey)
-          const savedTitle = localStorage.getItem(titleKey)
-          content = savedContent || ''
-          title = savedTitle || ''
+          // For localStorage mode, we'd need a different approach to get the most recent note
+          // For now, fallback to empty if no noteId is available
+          if (noteId) {
+            const contentKey = `note-${noteId}`
+            const titleKey = `note-title-${noteId}`
+            const savedContent = localStorage.getItem(contentKey)
+            const savedTitle = localStorage.getItem(titleKey)
+            content = savedContent || ''
+            title = savedTitle || ''
+          }
         }
 
         setInitialContent(content)
@@ -129,30 +147,80 @@ function NoteEditor() {
         }
       } catch (err) {
         console.error('Error loading note:', err)
-        const contentKey = `note-${noteId}`
-        const titleKey = `note-title-${noteId}`
-        const savedContent = localStorage.getItem(contentKey) || ''
-        const savedTitle = localStorage.getItem(titleKey) || ''
-        setInitialContent(savedContent)
-        setNoteTitle(savedTitle)
-        if (editor) {
-          editor.commands.setContent(savedContent)
+        // If no notes exist for the user, start with empty note
+        if (err.response?.status === 404) {
+          setInitialContent('')
+          setNoteTitle('')
+          if (editor) {
+            editor.commands.setContent('')
+          }
+        } else {
+          // Fallback to localStorage if backend fails
+          if (noteId) {
+            const contentKey = `note-${noteId}`
+            const titleKey = `note-title-${noteId}`
+            const savedContent = localStorage.getItem(contentKey) || ''
+            const savedTitle = localStorage.getItem(titleKey) || ''
+            setInitialContent(savedContent)
+            setNoteTitle(savedTitle)
+            if (editor) {
+              editor.commands.setContent(savedContent)
+            }
+          }
         }
       }
     }
 
     loadNote()
-  }, [noteId, editor])
+  }, [userId, editor])
 
-  const handleSave = () => {
-    if (editor) {
-      const content = editor.getHTML()
-      const contentKey = `note-${noteId}`
-      const titleKey = `note-title-${noteId}`
+  const handleSave = async () => {
+    if (!editor) {
+      return;
+    }
+    
+    const content = editor.getHTML()
 
-      // Save content and title the same way
-      localStorage.setItem(contentKey, content)
-      localStorage.setItem(titleKey, noteTitle)
+    if (SAVE_MODE === 'backend') {
+      try {
+        if (noteId) {
+          // Update existing note
+          await axios.patch(`/api/notes/${noteId}`, {
+            title: noteTitle,
+            content: content
+          })
+        } else {
+          // Create new note if no noteId exists
+          if (!userId) {
+            console.error('User not logged in');
+            return;
+          }
+          const res = await axios.post('/api/notes/createNote', {
+            title: noteTitle || 'Untitled',
+            content: content,
+            userID: userId
+          })
+          setNoteId(res.data._id)
+        }
+        setInitialContent(content)
+      } catch (err) {
+        console.error('Error saving note:', err)
+        // Fallback to localStorage on error
+        if (noteId) {
+          const contentKey = `note-${noteId}`
+          const titleKey = `note-title-${noteId}`
+          localStorage.setItem(contentKey, content)
+          localStorage.setItem(titleKey, noteTitle)
+        }
+      }
+    } else {
+      // Save to localStorage
+      if (noteId) {
+        const contentKey = `note-${noteId}`
+        const titleKey = `note-title-${noteId}`
+        localStorage.setItem(contentKey, content)
+        localStorage.setItem(titleKey, noteTitle)
+      }
       setInitialContent(content)
     }
   }
