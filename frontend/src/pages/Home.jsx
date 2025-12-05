@@ -247,12 +247,6 @@ const Home = () => {
                   <p className="document-meta">
                     {formatDate(note.updatedAt)}
                   </p>
-                  {note.content && (
-                    <p className="document-preview">
-                      {note.content.substring(0, 100)}
-                      {note.content.length > 100 ? '...' : ''}
-                    </p>
-                  )}
                 </div>
               </div>
             ))

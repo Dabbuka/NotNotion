@@ -1,16 +1,25 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import './css/Navbar.css';
 
 function Navbar() {
   const location = useLocation();
   const [currentUser, setCurrentUser] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     const user = storedUser ? JSON.parse(storedUser) : null;
     setCurrentUser(user);
   }, [location.pathname]);
+
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+    
+    setCurrentUser(null);
+    navigate('/');
+  };
 
   return (
     <nav className="navbar">
@@ -27,7 +36,13 @@ function Navbar() {
         >
           Home
         </Link>
-        {!currentUser && ( //change the conditional if you want to show the login and register buttons while signed in
+
+        {currentUser ? 
+        (
+            <button onClick={handleLogout} className="navbar-link navbar-link-logout">
+              Logout
+            </button>
+        ) : ( //change the conditional if you want to show the login and register buttons while signed in
           <>
             <Link 
               to="/login" 
