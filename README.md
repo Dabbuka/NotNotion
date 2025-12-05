@@ -87,3 +87,15 @@ npx playwright test --ui
 ```
 
 **Note:** Make sure both the backend and frontend servers are running before executing tests.
+
+## Diagrams
+### Application State Diagram
+This diagram illustrates the client-side state transitions and navigation flow throughout the NotNotion application. It shows how users move between different pages and the actions that trigger these transitions:
+
+![Web App State Diagram](./frontend/src/assets/NotNotion_state_diagram_2.png)
+
+**Initial entry** starts from the Landing Page (entry point of the application), which transitions to 
+**authentication flow** between Register and Login pages, allowing users to switch between registration and login. The
+**main application flow** occurs from Home Page to Note Editor, where users can create or select notes. 
+**Logout transitions** return authenticated users to the Landing Page from the Note Editor or Home Page. 
+**Self-loops** in the Note Editor indicate switching between notes without returning to the Home Page.
