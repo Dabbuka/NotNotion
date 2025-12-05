@@ -44,8 +44,8 @@
   background-color: #242424;
   display: flex;
   flex-direction: column;
-  /* Extra top padding to account for navbar (70px) + toolbar height (~50px) */
-  padding-top: 106px;
+  /* Navbar (56px) + Toolbar (40px) = 96px */
+  padding-top: 96px;
   box-sizing: border-box;
 }
 
@@ -62,16 +62,12 @@
   align-items: center;
   justify-content: space-between;
   gap: 4px;
-  padding:0px 16px;
+  padding: 2px 16px;
   width: 100%;
   max-width: 100vw;
-  /* Matches document width */
   background-color: #646;
   border: 1px solid #646;
   border-bottom: none;
-  
-  /* Will connect with document */
-  /* Stick toolbar to top below navbar - stays fixed when scrolling */
   position: fixed;
   top: 56px;
   left: 0;
@@ -79,9 +75,8 @@
   z-index: 99;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   margin: 0 auto;
-  /* Center the toolbar within the viewport while fixed */
   box-sizing: border-box;
-  max-height: 45px;
+  height: 40px;
 }
 
 /* Left section - Save button and title */
@@ -108,20 +103,22 @@
 .custom-md-editor .editor-layout {
   display: flex;
   width: 100%;
-  min-height: calc(100vh - 101px);
-  margin-top: 45px;
+  min-height: calc(100vh - 96px);
+  margin-top: 40px;
   position: relative;
 }
 
 /* Sidebar styles - fixed on the left */
+/* Navbar: 56px + Toolbar: 40px = 96px */
 .custom-md-editor .sidebar {
   position: fixed;
   left: 0;
-  top: 101px;
+  top: 96px;
   width: 280px;
-  height: calc(100vh - 101px);
-  background-color: #646;
+  height: calc(100vh - 96px);
+  background-color: #1e1e1e;
   border-right: 1px solid #333;
+  border-top: 1px solid #444;
   display: flex;
   flex-direction: column;
   overflow-y: auto;
@@ -130,7 +127,7 @@
 }
 
 .custom-md-editor .sidebar-header {
-  padding: 20px;
+  padding: 12px 20px 20px 20px;
   border-bottom: 1px solid #333;
 }
 
@@ -142,14 +139,14 @@
 
 .custom-md-editor .sidebar-content {
   flex: 1;
-  padding: 20px;
+  padding: 12px 20px 20px 20px;
 }
 
 .custom-md-editor .sidebar-content h4 {
   font-size: 0.9rem;
   text-transform: uppercase;
   color: #ccc;
-  margin-bottom: 12px;
+  margin: 0 0 12px 0;
   font-weight: 500;
   letter-spacing: 0.5px;
 }
@@ -210,7 +207,7 @@
   min-width: 900px;
   /* Matches toolbar width */
   width: 100%;
-  min-height: calc(100vh - 101px);
+  min-height: calc(100vh - 96px);
   background-color: #ffffff;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   padding: 90px 100px;
