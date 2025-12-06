@@ -34,7 +34,6 @@ You must have the following installed on your computer:
    cd NotNotion/frontend
    npm install
    ```
-
    This step downloads all packages listed in `package.json`
 
 3. **Run the Application:**
@@ -44,7 +43,40 @@ You must have the following installed on your computer:
    npm run dev
    ```
 
-   The application should now be accessible in your browser, typically at `http://localhost:5173/` (default port for Vite).
+
+  You should see a message like:
+  ```
+  > frontend@0.0.0 dev
+  > vite
+
+
+    VITE v7.1.12  ready in 208 ms
+
+    ➜  Local:   http://localhost:5173/
+    ➜  Network: use --host to expose
+    ➜  press h + enter to show help
+  ```
+  The frontend is now running locally at http://localhost:5173/
+
+  ## Folder Structure/
+  - **frontend/**
+    - **src/**
+      - **assets** - holds all of the png images used for the main README for the documentation
+      - **pages** - holds all of the jsx and css files, so all of the visual components of the app
+      - `App.jsx` - main app file that references all of the pages.
+      - `index.css`-  this is the global CSS file for NotNotion, setting the app-wide styles.
+      - `main.jsx` -  this is what our package.json references to (after looking inside index.html) when we run npm run dev
+  
+    - **test-results** - holds the json file of the passed and failed test cases
+      - `.last-run.json` - the described json file above
+    - **tests** - holds the playwright tests
+      - `auth.spec.ts` - tests the authentication of creating new users
+      - `create-note.spec.ts` - tests the ability to create new notes from the perspective of a new user wanting to use the app
+  
+    - `.env` –  environment variables, IGNORED BY GIT
+    - `package.json` – Node.js project file
+    - `README.md` – This file
+  
 
 4. **Install Backend Dependencies:**
    Navigate into project directory and install packages required for the backend:
@@ -66,6 +98,29 @@ You must have the following installed on your computer:
    ```bash
    npm start
    ```
+
+  ## API Routes
+
+  | Route                              | Method | Description                                    |
+  |-----------------------------------|--------|------------------------------------------------|
+  | **Notes**                         |        |                                                |
+  | /api/notes/createNote             | POST   | Create a new note                              |
+  | /api/notes/all                    | GET    | Get all notes for a user (requires userID query param) |
+  | /api/notes/:id                    | GET    | Get a single note by ID                        |
+  | /api/notes/:id                    | PATCH  | Update a note by ID                            |
+  | /api/notes/user/:userId           | GET    | Get the most recent note for a user            |
+  | /api/notes/user/:userId/:title    | GET    | Get a note by user ID and title                |
+  | **Users**                         |        |                                                |
+  | /api/users/register               | POST   | Register a new user                            |
+  | /api/users/login                  | POST   | Log in a user (returns JWT token)             |
+  | /api/users/me                     | GET    | Retrieve current user information              |
+  | **Folders**                       |        |                                                |
+  | /api/folders/createFolder         | POST   | Create a new folder                            |
+  | /api/folders/:id                  | GET    | Get a folder by ID                             |
+  | /api/folders/renameFolder         | PATCH  | Rename a folder                                |
+  | /api/folders/addFolder            | POST   | Add a folder                                   |
+
+
 
 ## Features:
 
