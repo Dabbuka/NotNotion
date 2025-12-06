@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react'
-import axios from 'axios'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Link from '@tiptap/extension-link'
 import Image from '@tiptap/extension-image'
 import Dropcursor from '@tiptap/extension-dropcursor'
+import { authService, noteService, folderService } from '../services'
 import FolderTree from './FolderTree'
 import './css/NoteEditor.css'
 
@@ -15,9 +15,7 @@ function NoteEditor() {
   const [searchParams] = useSearchParams()
   const urlNoteId = searchParams.get('noteId')
   
-  const storedUser = localStorage.getItem('user');
-  const user = storedUser ? JSON.parse(storedUser) : null;
-  const userId = user?._id;
+  const userId = authService.getCurrentUserId()
 
   const [noteId, setNoteId] = useState(urlNoteId || null)
   const [initialContent, setInitialContent] = useState("")
@@ -123,32 +121,22 @@ function NoteEditor() {
 
   // Fetch folders and notes for sidebar
   useEffect(() => {
-    const fetchFolders = async () => {
+    const fetchData = async () => {
+      if (!userId) return;
+      
       try {
-        if (!userId) return;
-        const response = await axios.get('/api/folders/all', {
-          params: { userID: userId },
-        });
-        setFolders(response.data);
+        const [foldersData, notesData] = await Promise.all([
+          folderService.getAllFolders(userId),
+          noteService.getAllNotes(userId)
+        ]);
+        setFolders(foldersData);
+        setNotes(notesData);
       } catch (error) {
-        console.error('Error fetching folders:', error);
+        console.error('Error fetching data:', error);
       }
     };
 
-    const fetchNotes = async () => {
-      try {
-        if (!userId) return;
-        const response = await axios.get('/api/notes/all', {
-          params: { userID: userId },
-        });
-        setNotes(response.data);
-      } catch (error) {
-        console.error('Error fetching notes:', error);
-      }
-    };
-
-    fetchFolders();
-    fetchNotes();
+    fetchData();
   }, [userId]);
 
   const handleFolderClick = (folderId) => {
@@ -179,16 +167,16 @@ function NoteEditor() {
           // If a specific noteId is provided (from URL or state), load that note
           // Otherwise, load the most recent note
           if (noteId) {
-            const res = await axios.get(`/api/notes/${noteId}`)
-            content = res.data.content || ''
-            title = res.data.title || ''
-            loadedNoteId = res.data._id || null
+            const noteData = await noteService.getNoteById(noteId)
+            content = noteData.content || ''
+            title = noteData.title || ''
+            loadedNoteId = noteData._id || null
           } else {
             // No specific note requested, load the most recent note
-            const res = await axios.get(`/api/notes/user/${userId}`)
-            content = res.data.content || ''
-            title = res.data.title || ''
-            loadedNoteId = res.data._id || null
+            const noteData = await noteService.getMostRecentNote(userId)
+            content = noteData.content || ''
+            title = noteData.title || ''
+            loadedNoteId = noteData._id || null
           }
           setNoteId(loadedNoteId)
         } else {
@@ -250,7 +238,7 @@ function NoteEditor() {
       try {
         if (noteId) {
           // Update existing note
-          await axios.patch(`/api/notes/${noteId}`, {
+          await noteService.updateNote(noteId, {
             title: noteTitle,
             content: content
           })
@@ -260,12 +248,12 @@ function NoteEditor() {
             console.error('User not logged in');
             return;
           }
-          const res = await axios.post('/api/notes/createNote', {
+          const newNote = await noteService.createNote({
             title: noteTitle || 'Untitled',
             content: content,
             userID: userId
           })
-          setNoteId(res.data._id)
+          setNoteId(newNote._id)
         }
         setInitialContent(content)
       } catch (err) {
@@ -378,4 +366,3 @@ function NoteEditor() {
 }
 
 export default NoteEditor
-

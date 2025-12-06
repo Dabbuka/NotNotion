@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { authService } from '../services';
 import './css/Login.css';
 
 const LoginPage = () => {
@@ -23,22 +23,9 @@ const LoginPage = () => {
     setError('');
 
     try {
-      const response = await axios.post('/api/users/login', {
-        email: formData.email,
-        password: formData.password
-      });
-
-      console.log('Login successful:', response.data);
-
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify({
-        _id: response.data._id,
-        username: response.data.username,
-        email: response.data.email
-      }));
-
+      const userData = await authService.login(formData.email, formData.password);
+      authService.saveUserToStorage(userData);
       navigate('/home');
-
     } catch (err) {
       console.error('Login failed:', err);
       setError(err.response?.data?.message || 'Login failed. Please check your credentials.');

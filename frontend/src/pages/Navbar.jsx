@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { authService } from '../services';
 import './css/Navbar.css';
 
 function Navbar() {
@@ -8,15 +9,12 @@ function Navbar() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    const user = storedUser ? JSON.parse(storedUser) : null;
+    const user = authService.getCurrentUser();
     setCurrentUser(user);
   }, [location.pathname]);
 
   const handleLogout = () => {
-    localStorage.removeItem('user');
-    localStorage.removeItem('token');
-    
+    authService.logout();
     setCurrentUser(null);
     navigate('/');
   };
@@ -74,4 +72,3 @@ function Navbar() {
 }
 
 export default Navbar;
-

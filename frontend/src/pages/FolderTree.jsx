@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { truncateText } from '../utils';
 import './css/FolderTree.css';
 
 const FolderTree = ({ folders, notes, currentFolderId, currentNoteId, onFolderClick, onNoteClick }) => {
@@ -61,7 +62,7 @@ const FolderTree = ({ folders, notes, currentFolderId, currentNoteId, onFolderCl
           <span className="folder-expand-icon-spacer" />
           <span className="folder-icon">📄</span>
           <span className="folder-name" title={note.title}>
-            {note.title.length > 20 ? note.title.substring(0, 20) + '...' : note.title}
+            {truncateText(note.title, 20)}
           </span>
         </div>
       </div>
@@ -95,7 +96,7 @@ const FolderTree = ({ folders, notes, currentFolderId, currentNoteId, onFolderCl
           )}
           <span className="folder-icon">📁</span>
           <span className="folder-name" title={folder.title}>
-            {folder.title.length > 20 ? folder.title.substring(0, 20) + '...' : folder.title}
+            {truncateText(folder.title, 20)}
           </span>
         </div>
         {folderHasChildren && isExpanded && (

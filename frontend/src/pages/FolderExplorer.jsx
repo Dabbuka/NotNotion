@@ -1,4 +1,5 @@
 import React from 'react';
+import { truncateText, isFolder, getItemId, getItemTitle } from '../utils';
 import './css/FolderExplorer.css';
 
 const FolderExplorer = ({ 
@@ -32,17 +33,16 @@ const FolderExplorer = ({
         ) : (
           <div className="folder-explorer-items">
             {items.map((item) => {
-              const isFolder = item.itemType === 'Folder' || item.isFolder;
-              const itemData = item.item || item;
-              const itemId = itemData._id || itemData;
-              const itemTitle = itemData.title || 'Untitled';
+              const itemIsFolder = isFolder(item);
+              const itemId = getItemId(item);
+              const itemTitle = getItemTitle(item);
 
               return (
                 <div
                   key={itemId}
-                  className={`folder-explorer-item ${isFolder ? 'folder-item' : 'file-item'}`}
+                  className={`folder-explorer-item ${itemIsFolder ? 'folder-item' : 'file-item'}`}
                   onClick={() => {
-                    if (isFolder) {
+                    if (itemIsFolder) {
                       onFolderClick(itemId);
                     } else {
                       onNoteClick(itemId);
@@ -50,10 +50,10 @@ const FolderExplorer = ({
                   }}
                 >
                   <span className="folder-explorer-icon">
-                    {isFolder ? '📁' : '📄'}
+                    {itemIsFolder ? '📁' : '📄'}
                   </span>
                   <span className="folder-explorer-name" title={itemTitle}>
-                    {itemTitle.length > 25 ? itemTitle.substring(0, 25) + '...' : itemTitle}
+                    {truncateText(itemTitle, 25)}
                   </span>
                 </div>
               );
@@ -66,4 +66,3 @@ const FolderExplorer = ({
 };
 
 export default FolderExplorer;
-
