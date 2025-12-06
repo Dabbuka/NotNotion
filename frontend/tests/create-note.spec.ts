@@ -28,7 +28,7 @@ test('login, create note, write message, save note', async ({ page }) => {
   // Write message and save note
   await page.locator('.editor-content').click();
   await page.keyboard.type(noteContent);
-  await page.click('button:has-text("Save Document")');
+  await page.click('button:has-text("Save")');
 
   // Go back to home page
   await page.click('nav a:has-text("Home")');
