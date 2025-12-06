@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import axios from 'axios';
+import { authService, noteService, folderService } from '../services';
+import { formatDate, isFolder, getItemId, getItemTitle, getItemDate, sortItems, filterItemsBySearch } from '../utils';
+import { SidebarNoteItem, EmptyState, Breadcrumbs, SearchInput, SortSelect } from '../components';
 import './css/Home.css';
 
 const Home = () => {
@@ -21,15 +23,41 @@ const Home = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const navigate = useNavigate();
 
+  // Fetch notes function
+  const fetchNotes = async (userFromArg) => {
+    try {
+      const user = userFromArg || currentUser;
+      if (!user?._id) return;
+  
+      const data = await noteService.getAllNotes(user._id);
+      setNotes(data);
+    } catch (error) {
+      console.error('Error fetching notes:', error);
+    }
+  };
+
+  // Fetch folders function
+  const fetchFolders = async (userFromArg) => {
+    try {
+      const user = userFromArg || currentUser;
+      if (!user?._id) return;
+
+      const data = await folderService.getAllFolders(user._id);
+      setFolders(data);
+    } catch (error) {
+      console.error('Error fetching folders:', error);
+    }
+  };
+
   // Load current user and fetch notes/folders on component mount
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    const user = storedUser ? JSON.parse(storedUser) : null;
+    const user = authService.getCurrentUser();
     setCurrentUser(user);
     if (user) {
       fetchNotes(user);
       fetchFolders(user);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Fetch folder contents when URL folder parameter changes
@@ -51,12 +79,7 @@ const Home = () => {
       const allFolders = folders.map(f => ({ ...f, itemType: 'Folder', isFolder: true }));
       const allItems = [...allFolders, ...allNotes];
       
-      items = allItems.filter(item => {
-        const title = item.title || '';
-        const content = item.content || '';
-        return title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-               content.toLowerCase().includes(searchQuery.toLowerCase());
-      });
+      items = filterItemsBySearch(allItems, searchQuery);
     } else {
       // Get items based on current folder context (no search)
       if (currentFolderId && currentFolderContents) {
@@ -76,62 +99,15 @@ const Home = () => {
       }
     }
 
-    // Sort items
-    const sorted = [...items].sort((a, b) => {
-      const aTitle = a.item?.title || a.title || '';
-      const bTitle = b.item?.title || b.title || '';
-      const aDate = a.item?.updatedAt || a.updatedAt || new Date();
-      const bDate = b.item?.updatedAt || b.updatedAt || new Date();
-      const aCreated = a.item?.createdAt || a.createdAt || new Date();
-      const bCreated = b.item?.createdAt || b.createdAt || new Date();
-
-      switch (sortBy) {
-        case 'name':
-          return aTitle.localeCompare(bTitle);
-        case 'date':
-          return new Date(bCreated) - new Date(aCreated);
-        case 'lastModified':
-          return new Date(bDate) - new Date(aDate);
-        default:
-          return 0;
-      }
-    });
-
+    // Sort items using utility function
+    const sorted = sortItems(items, sortBy);
     setFilteredItems(sorted);
   }, [searchQuery, sortBy, notes, folders, currentFolderId, currentFolderContents]);
 
-  const fetchNotes = async (userFromArg) => {
-    try {
-      const user = userFromArg || currentUser;
-      if (!user?._id) return;
-  
-      const response = await axios.get('/api/notes/all', {
-        params: { userID: user._id },
-      });
-      setNotes(response.data);
-    } catch (error) {
-      console.error('Error fetching notes:', error);
-    }
-  };
-
-  const fetchFolders = async (userFromArg) => {
-    try {
-      const user = userFromArg || currentUser;
-      if (!user?._id) return;
-
-      const response = await axios.get('/api/folders/all', {
-        params: { userID: user._id },
-      });
-      setFolders(response.data);
-    } catch (error) {
-      console.error('Error fetching folders:', error);
-    }
-  };
-
   const fetchFolderContents = async (folderId) => {
     try {
-      const response = await axios.get(`/api/folders/${folderId}/contents`);
-      setCurrentFolderContents(response.data);
+      const data = await folderService.getFolderContents(folderId);
+      setCurrentFolderContents(data);
     } catch (error) {
       console.error('Error fetching folder contents:', error);
     }
@@ -142,8 +118,7 @@ const Home = () => {
     if (!newNoteTitle.trim()) return;
 
     try {
-      const storedUser = localStorage.getItem('user');
-      const user = storedUser ? JSON.parse(storedUser) : null;
+      const user = authService.getCurrentUser();
 
       if (!user?._id) {
         alert("You must be logged in to create a document.");
@@ -160,22 +135,19 @@ const Home = () => {
         noteData.folderID = currentFolderId;
       }
 
-      const response = await axios.post('/api/notes/createNote', noteData);
+      const newNote = await noteService.createNote(noteData);
       
-      setNotes([response.data, ...notes]);
+      setNotes([newNote, ...notes]);
       
       if (currentFolderId) {
-        await axios.post(`/api/folders/${currentFolderId}/addItem`, {
-          itemId: response.data._id,
-          itemType: 'Note'
-        });
+        await folderService.addItemToFolder(currentFolderId, newNote._id, 'Note');
         fetchFolderContents(currentFolderId);
       }
       
       setNewNoteTitle('');
       setShowNewNoteForm(false);
       
-      navigate(`/app?noteId=${response.data._id}`);
+      navigate(`/app?noteId=${newNote._id}`);
     } catch (error) {
       console.error('Error creating note:', error);
       alert('Failed to create note. Please try again.');
@@ -187,8 +159,7 @@ const Home = () => {
     if (!newFolderTitle.trim()) return;
 
     try {
-      const storedUser = localStorage.getItem('user');
-      const user = storedUser ? JSON.parse(storedUser) : null;
+      const user = authService.getCurrentUser();
 
       if (!user?._id) {
         alert("You must be logged in to create a folder.");
@@ -204,15 +175,12 @@ const Home = () => {
         folderData.parentFolderID = currentFolderId;
       }
 
-      const response = await axios.post('/api/folders/createFolder', folderData);
+      const newFolder = await folderService.createFolder(folderData);
       
-      setFolders([response.data, ...folders]);
+      setFolders([newFolder, ...folders]);
       
       if (currentFolderId) {
-        await axios.post(`/api/folders/${currentFolderId}/addItem`, {
-          itemId: response.data._id,
-          itemType: 'Folder'
-        });
+        await folderService.addItemToFolder(currentFolderId, newFolder._id, 'Folder');
         fetchFolderContents(currentFolderId);
       }
       
@@ -257,24 +225,6 @@ const Home = () => {
     return breadcrumbs;
   };
 
-  const formatDate = (dateString) => {
-    if (!dateString) return 'No date';
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffTime = Math.abs(now - date);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-    if (diffDays === 1) return 'Today';
-    if (diffDays === 2) return 'Yesterday';
-    if (diffDays <= 7) return `${diffDays - 1} days ago`;
-    
-    return date.toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: 'numeric', 
-      year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined 
-    });
-  };
-
   return (
     <div className="home-container">
       {/* Sidebar */}
@@ -291,16 +241,11 @@ const Home = () => {
           <div className="sidebar-section">
             <div className="sidebar-notes">
               {notes.slice(0, 10).map((note) => (
-                <div
+                <SidebarNoteItem
                   key={note._id}
-                  className="sidebar-note-item"
-                  onClick={() => handleNoteClick(note._id)}
-                >
-                  <span className="sidebar-note-icon">📄</span>
-                  <span className="sidebar-note-title" title={note.title}>
-                    {note.title.length > 20 ? note.title.substring(0, 20) + '...' : note.title}
-                  </span>
-                </div>
+                  note={note}
+                  onClick={handleNoteClick}
+                />
               ))}
               {notes.length === 0 && (
                 <div className="sidebar-empty">No documents yet</div>
@@ -314,49 +259,25 @@ const Home = () => {
       <div className="main-content">
         {/* Header with Search and Sort */}
         <div className="home-header">
-          <div className="search-container">
-            <input
-              type="text"
-              placeholder="Search documents..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="search-input"
-            />
-          </div>
+          <SearchInput
+            value={searchQuery}
+            onChange={setSearchQuery}
+            placeholder="Search documents..."
+          />
           
-          <div className="sort-container">
-            <label htmlFor="sort-select">Sort by:</label>
-            <select
-              id="sort-select"
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="sort-select"
-            >
-              <option value="lastModified">Last Modified</option>
-              <option value="name">Name</option>
-              <option value="date">Date Created</option>
-            </select>
-          </div>
+          <SortSelect
+            value={sortBy}
+            onChange={setSortBy}
+          />
         </div>
 
         {/* Breadcrumb Navigation */}
         {currentFolderId && (
-          <div className="breadcrumb-nav">
-            <button onClick={handleBackToRoot} className="breadcrumb-home">
-              Home
-            </button>
-            {getBreadcrumbs().map((crumb) => (
-              <React.Fragment key={crumb.id}>
-                <span className="breadcrumb-separator"> / </span>
-                <button
-                  onClick={() => navigate(`/home?folder=${crumb.id}`)}
-                  className="breadcrumb-item"
-                >
-                  {crumb.title}
-                </button>
-              </React.Fragment>
-            ))}
-          </div>
+          <Breadcrumbs
+            items={getBreadcrumbs()}
+            onHomeClick={handleBackToRoot}
+            onItemClick={(id) => navigate(`/home?folder=${id}`)}
+          />
         )}
 
         {/* Add New Document/Folder Section */}
@@ -436,43 +357,33 @@ const Home = () => {
         {/* Documents Grid */}
         <div className="documents-grid">
           {filteredItems.length === 0 ? (
-            <div className="empty-state">
-              {searchQuery ? (
-                <p>No items found matching "{searchQuery}"</p>
-              ) : (
-                <div>
-                  <p className="empty-state-title">
-                    {currentFolderId ? 'This folder is empty' : 'No items yet'}
-                  </p>
-                  <p className="empty-state-subtitle">
-                    {currentFolderId 
-                      ? 'Add documents or folders to get started' 
-                      : 'Create your first document or folder to get started'}
-                  </p>
-                </div>
-              )}
-            </div>
+            <EmptyState
+              searchQuery={searchQuery}
+              title={currentFolderId ? 'This folder is empty' : 'No items yet'}
+              subtitle={currentFolderId 
+                ? 'Add documents or folders to get started' 
+                : 'Create your first document or folder to get started'}
+            />
           ) : (
             filteredItems.map((item) => {
-              const isFolder = item.itemType === 'Folder' || item.isFolder;
-              const itemData = item.item || item;
-              const itemId = itemData._id;
-              const itemTitle = itemData.title;
-              const itemDate = itemData.updatedAt;
+              const itemIsFolder = isFolder(item);
+              const itemId = getItemId(item);
+              const itemTitle = getItemTitle(item);
+              const itemDate = getItemDate(item);
 
               return (
                 <div key={itemId} className="document-wrapper">
                   <div
-                    className={`document-card ${isFolder ? 'folder-card' : ''}`}
+                    className={`document-card ${itemIsFolder ? 'folder-card' : ''}`}
                     onClick={() => {
-                      if (isFolder) {
+                      if (itemIsFolder) {
                         handleFolderClick(itemId);
                       } else {
                         handleNoteClick(itemId);
                       }
                     }}
                   >
-                    {isFolder && <span className="folder-card-icon"></span>}
+                    {itemIsFolder && <span className="folder-card-icon"></span>}
                   </div>
                   <div className="document-info">
                     <h3 className="document-title" title={itemTitle}>

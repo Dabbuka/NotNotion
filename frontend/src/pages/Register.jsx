@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { authService } from '../services';
 import './css/Register.css';
 
 const RegisterPage = () => {
@@ -24,23 +24,13 @@ const RegisterPage = () => {
     setError('');
 
     try {
-      const response = await axios.post('/api/users/register', {
-        username: formData.username,
-        email: formData.email,
-        password: formData.password
-      });
-
-      console.log('Registration successful:', response.data);
-
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify({
-        _id: response.data._id,
-        username: response.data.username,
-        email: response.data.email
-      }));
-
+      const userData = await authService.register(
+        formData.username,
+        formData.email,
+        formData.password
+      );
+      authService.saveUserToStorage(userData);
       navigate('/home');
-
     } catch (err) {
       console.error('Registration failed:', err);
       setError(err.response?.data?.message || 'Registration failed. Please try again.');
